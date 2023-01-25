@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
+using Newtonsoft.Json;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Models;
@@ -13,11 +16,13 @@ namespace RekrutacjaApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUserRepository _userRepository;
+        private readonly IMemoryCache _memoryCache;
 
-        public HomeController(ILogger<HomeController> logger, IUserRepository userRepository)
+        public HomeController(ILogger<HomeController> logger, IUserRepository userRepository, IMemoryCache memoryCache)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         }
 
         [HttpGet]
@@ -53,10 +58,20 @@ namespace RekrutacjaApp.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<PagedResult<List<UserDto>>>> Index([FromQuery] QueryParams queryParams)
+        public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams queryParams)
         {
-            PagedResult<List<UserDto>>? users = await _userRepository.GetUsers(queryParams);
-            return View(users);
+
+            string key = JsonConvert.SerializeObject(queryParams);
+
+            var cachedValue = await _memoryCache.GetOrCreateAsync(
+                key,
+                async cacheEntry =>
+                {
+                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(3);
+                    return await _userRepository.GetUsers(queryParams);
+                });
+
+            return View(cachedValue);
         }
 
         [HttpGet]
@@ -67,11 +82,19 @@ namespace RekrutacjaApp.Controllers
 
             if (id is null) return NotFound();
 
-            UserDto? user = await _userRepository.GetUser(id);
+            string key = JsonConvert.SerializeObject($"User_{id}");
 
-            if (user is null) return NotFound();
+            var cachedValue = await _memoryCache.GetOrCreateAsync(
+                key,
+                async cacheEntry =>
+                {
+                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(3);
+                    return await _userRepository.GetUser(id);
+                });
 
-            return user;
+            if (cachedValue is null) return NotFound();
+
+            return cachedValue;
         }
 
 

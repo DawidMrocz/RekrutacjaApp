@@ -86,7 +86,7 @@ namespace RekrutacjaApp.Data
                     CustomAttributeId = 3,
                     UserId = 2,
                     Name = "Kolor kurtki",
-                    Value = "Nibieski",
+                    Value = "Niebieski",
                 }
              );
         }

@@ -2,7 +2,9 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
+using Newtonsoft.Json;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
@@ -29,7 +31,7 @@ namespace RekrutacjaApp.Repositories
             return true;
         }
 
-        public async Task<PagedResult<List<UserDto>>> GetUsers(QueryParams queryParams)
+        public async Task<List<UserDto>> GetUsers(QueryParams queryParams)
         {
             var query = _context.Users
                 .Include(attr => attr.CustomAttributes)
@@ -64,18 +66,12 @@ namespace RekrutacjaApp.Repositories
                 .ThenBy(s => s.Surname)
                 .ToListAsync();
 
-            return new PagedResult<List<UserDto>>
-            {
-                CurrentPage = queryParams.page,
-                PageSize = queryParams.pageSize,
-                TotalCount = totalCount,
-                Results = result
-            };
+            return result;
         }
 
         public async Task<UserDto> GetUser(int? id)
         {
-            UserDto? user = _mapper.Map<UserDto>(await _context.Users.FirstOrDefaultAsync(i => i.UserId == id));
+            UserDto? user = _mapper.Map<UserDto>(await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == id));
             if (user is null) throw new BadHttpRequestException("User not found");
             return user!;
         }
@@ -100,7 +96,6 @@ namespace RekrutacjaApp.Repositories
             if (userToDelete is null) throw new BadHttpRequestException("User not found");
             return true;
         }
-
 
         public async Task<User> UpdateUser(User updateUserDto, int? userId)
         {

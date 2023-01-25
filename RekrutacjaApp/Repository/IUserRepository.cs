@@ -8,7 +8,7 @@ namespace RekrutacjaApp.Repositories
     public interface IUserRepository
     {
         public Task<UserDto> GetUser(int? userId);      
-        public Task<PagedResult<List<UserDto>>> GetUsers(QueryParams queryParams);
+        public Task<List<UserDto>> GetUsers(QueryParams queryParams);
 
         public Task<User> CreateUser(User createUserDto);
         public Task<User> UpdateUser(User updateUser, int? userId);

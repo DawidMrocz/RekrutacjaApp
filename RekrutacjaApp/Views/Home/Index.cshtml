@@ -2,7 +2,130 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<button type="button" class="button-62" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Nowe zadanie
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Nowe zadanie</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3" method="post" asp-action="CreateUser" asp-controller="Home">
+                    <div class="col-md-6">
+                        <label for="Name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="Name" name="Name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Surname" class="form-label">Surname</label>
+                        <input type="text" class="form-control" id="Surname" name="Surname" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="BirthDate" class="form-label">Date Of Birth</label>
+                        <div><input type="date" class="form-control" name="BirthDate" required></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="Gender" class="form-label">Gender</label>
+                        <select id="iGender" class="form-select" name="Gender" required>
+                            <option selected value="M">Mężczyzna</option>
+                            <option value="F">Kobieta</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                    
+                </form>
+            </div>
+
+        </div>
+    </div>
 </div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>g</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>d</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td>Larry</td>
+            <td>the Bird</td>
+            <td>f</td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+<form method="post">
+    <div>
+        <label for="FirstName">Imię:</label>
+        <input type="text" id="FirstName" name="FirstName" required />
+    </div>
+    <div>
+        <label for="LastName">Nazwisko:</label>
+        <input type="text" id="LastName" name="LastName" required />
+    </div>
+    <div>
+        <label for="DateOfBirth">Data urodzenia:</label>
+        <input type="date" id="DateOfBirth" name="DateOfBirth" required />
+    </div>
+    <div>
+        <label for="Gender">Płeć:</label>
+        <select id="Gender" name="Gender" required>
+            <option value="M">Mężczyzna</option>
+            <option value="F">Kobieta</option>
+        </select>
+    </div>
+    <div>
+        <input type="submit" value="Utwórz" />
+    </div>
+</form>
+
+<form method="post">
+    <div id="key-value-pairs">
+        <div>
+            <label for="Key">Key:</label>
+            <input type="text" id="Key" name="Key" required />
+            <label for="Value">Value:</label>
+            <input type="text" id="Value" name="Value" required />
+        </div>
+    </div>
+    <div>
+        <button type="button" onclick="addKeyValuePair()">Add Key-Value Pair</button>
+    </div>
+    <div>
+        <input type="submit" value="Add to Dictionary" />
+    </div>
+</form>
+
+
+<form asp-action="Index" asp-controller="Home" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- ... -->
+</form>

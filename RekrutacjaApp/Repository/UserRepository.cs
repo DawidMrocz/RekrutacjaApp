@@ -1,7 +1,10 @@
 ﻿
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using MyWebApplication.Dtos;
 using RekrutacjaApp.Data;
+using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 
 namespace RekrutacjaApp.Repositories
@@ -9,10 +12,12 @@ namespace RekrutacjaApp.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public UserRepository(ApplicationDbContext context)
+        public UserRepository(ApplicationDbContext context, IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<bool> VerifyName(string firstName, string lastName)
@@ -24,33 +29,42 @@ namespace RekrutacjaApp.Repositories
             return true;
         }
 
-        public async Task<List<User>> SearchUsers(SearchQuery searchQuery)
+        public async Task<PagedResult<List<UserDto>>> GetUsers(QueryParams queryParams)
         {
-            IQueryable<User> users = _context.Users.AsQueryable();
+            var query = _context.Users
+                .Include(attr => attr.CustomAttributes)
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking().AsQueryable();
 
-            if (!String.IsNullOrEmpty(searchQuery.SearchString))
+            if (!string.IsNullOrEmpty(queryParams.SearchString)) 
             {
-                users = users.Where(s => s.Name!.Contains(searchQuery.SearchString));
-            }
-            return await users.AsNoTracking().ToListAsync();
-        }
+                query = query.Where(u => u.Name.Contains(queryParams.SearchString) || u.Surname.Contains(queryParams.SearchString));
+            };
 
-        public async Task<PagedResult<List<User>>> GetUsers(QueryParams queryParams)
-        {
-            var query =  _context.Users.AsQueryable();
-
-            if (!string.IsNullOrEmpty(queryParams.Name))
+            if (queryParams.AgeMin is not null)
             {
-                query = query.Where(u => u.Name.Contains(queryParams.Name) || u.Surname.Contains(queryParams.Surname!));
-            }
+                query = query.Where(u => u.Age >= queryParams.AgeMin);
+            };
+
+            if (queryParams.AgeMax is not null)
+            {
+                query = query.Where(u => u.Age <= queryParams.AgeMax);
+            };
+
+            if (!string.IsNullOrEmpty(queryParams.SearchString))
+            {
+                query = query.Where(u => u.Name.Contains(queryParams.SearchString) || u.Surname.Contains(queryParams.SearchString));
+            };
 
             var totalCount = await query.CountAsync();
             var result = await query
                 .Skip((queryParams.page - 1) * queryParams.pageSize)
                 .Take(queryParams.pageSize)
+                .OrderBy(n => n.Name)
+                .ThenBy(s => s.Surname)
                 .ToListAsync();
 
-            return new PagedResult<List<User>>
+            return new PagedResult<List<UserDto>>
             {
                 CurrentPage = queryParams.page,
                 PageSize = queryParams.pageSize,
@@ -59,9 +73,10 @@ namespace RekrutacjaApp.Repositories
             };
         }
 
-        public async Task<User> GetUser(Guid? id)
+        public async Task<UserDto> GetUser(int? id)
         {
-            User? user = await _context.Users.FirstOrDefaultAsync(i => i.Id == id);
+            UserDto? user = _mapper.Map<UserDto>(await _context.Users.FirstOrDefaultAsync(i => i.UserId == id));
+            if (user is null) throw new BadHttpRequestException("User not found");
             return user!;
         }
         public async Task<User> CreateUser(User createUserDto)
@@ -79,17 +94,17 @@ namespace RekrutacjaApp.Repositories
             return newUser;
         }
 
-        public async Task<bool> DeleteUser(Guid? userId)
+        public async Task<bool> DeleteUser(int? userId)
         {
-            User? userToDelete = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            User? userToDelete = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (userToDelete is null) throw new BadHttpRequestException("User not found");
             return true;
         }
 
 
-        public async Task<User> UpdateUser(User updateUserDto, Guid? userId)
+        public async Task<User> UpdateUser(User updateUserDto, int? userId)
         {
-            User? currentUser = await _context.Users.SingleAsync(r => r.Id == userId);
+            User? currentUser = await _context.Users.SingleAsync(r => r.UserId == userId);
 
             if (currentUser is null) throw new BadHttpRequestException("Bad");
 

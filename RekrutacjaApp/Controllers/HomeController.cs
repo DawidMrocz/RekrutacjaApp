@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyWebApplication.Dtos;
+using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Models;
 using RekrutacjaApp.Repositories;
@@ -19,22 +20,7 @@ namespace RekrutacjaApp.Controllers
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        //ZMIENIC !
-        [HttpPost]
-        public IActionResult AddToDictionary(List<KeyValuePair<string, string>> keyValuePairs)
-        {
-            foreach (var keyValuePair in keyValuePairs)
-            {
-                //_myDictionary.Add(keyValuePair.Key, keyValuePair.Value);
-            }
-            return RedirectToAction("Index");
-        }
-
-
-
         [HttpGet]
-        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GenerateRaport()
         {
             List<User>? users = await _userRepository.GetUsersForRaport();
@@ -46,7 +32,7 @@ namespace RekrutacjaApp.Controllers
                 writer.WriteLine("Imię,Nazwisko,Data urodzenia,Płeć,Tytuł,Wiek");
                 foreach (var user in users)
                 {
-                    writer.WriteLine("{0},{1},{2},{3},{4},{5}", user.Name, user.Surname, user.BirthDate.ToString("yyyy-MM-dd"), user.Gender, user.Title, user.Age);
+                    writer.WriteLine("{0},{1},{2},{3},{4}", user.Title,user.DisplayName, user.BirthDate.ToString("yyyy-MM-dd"), user.Age, user.Gender);
                 }
             }
 
@@ -67,30 +53,21 @@ namespace RekrutacjaApp.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<List<User>> SearchUsers([FromQuery] SearchQuery searchQuery)
+        public async Task<ActionResult<PagedResult<List<UserDto>>>> Index([FromQuery] QueryParams queryParams)
         {
-            List<User>? users = await _userRepository.SearchUsers(searchQuery);
-            return users;
-        }
-
-        [HttpGet]
-        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<PagedResult<List<User>>>> GetUsers([FromQuery] QueryParams queryParams)
-        {
-            PagedResult<List<User>>? users = await _userRepository.GetUsers(queryParams);
+            PagedResult<List<UserDto>>? users = await _userRepository.GetUsers(queryParams);
             return View(users);
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<User>> GetUser([FromRoute] Guid? id)
+        public async Task<ActionResult<UserDto>> GetUser([FromRoute] int? id)
         {
 
             if (id is null) return NotFound();
 
-            User? user = await _userRepository.GetUser(id);
+            UserDto? user = await _userRepository.GetUser(id);
 
             if (user is null) return NotFound();
 
@@ -102,7 +79,7 @@ namespace RekrutacjaApp.Controllers
         [AutoValidateAntiforgeryToken]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> CreateUser([FromForm][Bind("Name,Surname,BirthDate,Gender")] User createUserDto)
+        public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender")] User createUserDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -114,7 +91,7 @@ namespace RekrutacjaApp.Controllers
         [HttpDelete]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<bool>> DeleteUser([FromRoute] Guid? userId)
+        public async Task<ActionResult<bool>> DeleteUser([FromRoute] int? userId)
         {
             if (userId is null) return NotFound();
             await _userRepository.DeleteUser(userId);
@@ -124,17 +101,14 @@ namespace RekrutacjaApp.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<User>> UpdateUser([FromBody] User updateUserDto, [FromRoute] Guid? userId)
+        public async Task<ActionResult<User>> UpdateUser([FromBody] User updateUserDto, [FromRoute] int? userId)
         {
             User? currentUser = await _userRepository.UpdateUser(updateUserDto, userId);
-
             if (currentUser is null) return NotFound("Not found");
-
             currentUser.Name = updateUserDto.Name;
             currentUser.Surname = updateUserDto.Surname;
             currentUser.BirthDate = updateUserDto.BirthDate;
             currentUser.Gender = updateUserDto.Gender;
-
             return Ok(currentUser);
         }
 

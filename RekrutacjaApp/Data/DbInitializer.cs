@@ -17,7 +17,7 @@ namespace RekrutacjaApp.Data
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 1,
                     Name = "Dawid",
                     Surname = "Mroczkowski",
                     BirthDate = new DateTime(1996, 12, 10),
@@ -26,7 +26,7 @@ namespace RekrutacjaApp.Data
                 },
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 2,
                     Name = "Adam",
                     Surname = "Nowak",
                     BirthDate = new DateTime(1997, 01, 14),
@@ -34,7 +34,7 @@ namespace RekrutacjaApp.Data
                 },
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 3,
                     Name = "Jan",
                     Surname = "Kowalski",
                     BirthDate = new DateTime(1986, 7, 21),
@@ -42,7 +42,7 @@ namespace RekrutacjaApp.Data
                 },
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 4,
                     Name = "Karolina",
                     Surname = "Szpak",
                     BirthDate = new DateTime(1979, 3, 13),
@@ -50,7 +50,7 @@ namespace RekrutacjaApp.Data
                 },
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 5,
                     Name = "Wiktoria",
                     Surname = "Kowalska",
                     BirthDate = new DateTime(1944, 12, 21),
@@ -58,11 +58,35 @@ namespace RekrutacjaApp.Data
                 },
                 new User
                 {
-                    Id = Guid.NewGuid(),
+                    UserId = 6,
                     Name = "Zbigniew",
                     Surname = "Stawik",
                     BirthDate = new DateTime(1990, 4, 13),
                     Gender = Gender.Male,
+                }
+             );
+            modelBuilder.Entity<CustomAttribute>().HasData(
+                new CustomAttribute
+                {
+                    CustomAttributeId = 1,
+                    UserId = 1,
+                    Name = "Numer buta",
+                    Value = "43",
+                    
+                },
+                new CustomAttribute
+                {
+                    CustomAttributeId = 2,
+                    UserId = 2,
+                    Name = "Kolor włosów",
+                    Value = "Czarne",
+                },
+                new CustomAttribute
+                {
+                    CustomAttributeId = 3,
+                    UserId = 2,
+                    Name = "Kolor kurtki",
+                    Value = "Nibieski",
                 }
              );
         }

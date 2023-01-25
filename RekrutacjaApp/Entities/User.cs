@@ -15,7 +15,7 @@ namespace RekrutacjaApp.Entities
 
         private int currentYear = DateTime.Now.Year;
 
-        public Guid Id { get; set; }
+        public int UserId { get; set; }
         [Required]
         [CustomPersonalValidator(50)]
         [Remote(action: "VerifyName", controller: "Users", AdditionalFields = nameof(Name))]
@@ -31,8 +31,8 @@ namespace RekrutacjaApp.Entities
         [Required]
         [EnumDataType(typeof(Gender))]
         public required Gender Gender { get; set; }
-        public Dictionary<string, string>? Attributes { get; set; } = new Dictionary<string, string>();
-
+        public List<CustomAttribute>? CustomAttributes { get; set; } = new();
+      
         public string DisplayName
         {
             get

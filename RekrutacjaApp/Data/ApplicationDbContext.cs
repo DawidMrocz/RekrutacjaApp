@@ -6,6 +6,7 @@ namespace RekrutacjaApp.Data
     public class ApplicationDbContext:DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<CustomAttribute> CustomAttributes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)

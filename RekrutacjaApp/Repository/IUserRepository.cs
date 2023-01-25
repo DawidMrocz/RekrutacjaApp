@@ -1,19 +1,21 @@
 ﻿
 using MyWebApplication.Dtos;
+using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 
 namespace RekrutacjaApp.Repositories
 {
     public interface IUserRepository
     {
-        public Task<User> GetUser(Guid? userId);
-        public Task<List<User>> GetUsersForRaport();
-        public Task<PagedResult<List<User>>> GetUsers(QueryParams queryParams);
-        public Task<List<User>> SearchUsers(SearchQuery searchQuery);
-        public Task<User> CreateUser(User createUserDto);
-        public Task<bool> DeleteUser(Guid? userId);
-        public Task<User> UpdateUser(User updateUser, Guid? userId);
+        public Task<UserDto> GetUser(int? userId);      
+        public Task<PagedResult<List<UserDto>>> GetUsers(QueryParams queryParams);
 
+        public Task<User> CreateUser(User createUserDto);
+        public Task<User> UpdateUser(User updateUser, int? userId);
+        public Task<bool> DeleteUser(int? userId);
+        
+
+        public Task<List<User>> GetUsersForRaport();
         public Task<bool> VerifyName(string firstName, string lastName);
     }
 }

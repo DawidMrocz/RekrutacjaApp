@@ -1,25 +1,26 @@
 ﻿
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using MyWebApplication.Dtos;
 using Newtonsoft.Json;
+using RekrutacjaApp.Commands;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
+using RekrutacjaApp.Helpers;
+using RekrutacjaApp.Queries;
 
 namespace RekrutacjaApp.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;      
+        private readonly IDistributedCache _cache;
 
-        public UserRepository(ApplicationDbContext context, IMapper mapper)
+        public UserRepository(ApplicationDbContext context,IDistributedCache cache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         public async Task<bool> VerifyName(string firstName, string lastName)
@@ -31,91 +32,109 @@ namespace RekrutacjaApp.Repositories
             return true;
         }
 
-        public async Task<List<UserDto>> GetUsers(QueryParams queryParams)
+        public async Task<List<User>> GetUsers(GetUsersQuery command)
         {
-            var query = _context.Users
+            string key = JsonConvert.SerializeObject(command.queryParams);
+            List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
+            if (users is null)
+            {
+
+                var query = _context.Users
                 .Include(attr => attr.CustomAttributes)
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking().AsQueryable();
+                .AsQueryable();
 
-            if (!string.IsNullOrEmpty(queryParams.SearchString)) 
-            {
-                query = query.Where(u => u.Name.Contains(queryParams.SearchString) || u.Surname.Contains(queryParams.SearchString));
-            };
+                if (!string.IsNullOrEmpty(command.queryParams.SearchString))
+                {
+                    query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString));
+                };
 
-            if (queryParams.AgeMin is not null)
-            {
-                query = query.Where(u => u.Age >= queryParams.AgeMin);
-            };
+                if (command.queryParams.AgeMin is not null)
+                {
+                    query = query.Where(u => u.Age >= command.queryParams.AgeMin);
+                };
 
-            if (queryParams.AgeMax is not null)
-            {
-                query = query.Where(u => u.Age <= queryParams.AgeMax);
-            };
+                if (command.queryParams.AgeMax is not null)
+                {
+                    query = query.Where(u => u.Age <= command.queryParams.AgeMax);
+                };
 
-            if (!string.IsNullOrEmpty(queryParams.SearchString))
-            {
-                query = query.Where(u => u.Name.Contains(queryParams.SearchString) || u.Surname.Contains(queryParams.SearchString));
-            };
+                switch (command.queryParams.SortOrder)
+                {
+                    case "name":
+                        query = query.OrderBy(u => u.Name); break;
+                    case "surname":
+                        query = query.OrderBy(s => s.Surname); break;
+                    default:
+                        break;
+                }
 
-            var totalCount = await query.CountAsync();
-            var result = await query
-                .Skip((queryParams.page - 1) * queryParams.pageSize)
-                .Take(queryParams.pageSize)
-                .OrderBy(n => n.Name)
-                .ThenBy(s => s.Surname)
-                .ToListAsync();
+                var totalCount = await query.CountAsync();
+                users = await query
+                    .Skip((command.queryParams.page - 1) * command.queryParams.pageSize)
+                    .Take(command.queryParams.pageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
 
-            return result;
+                await _cache.SetRecordAsync(key, users);
+            }         
+            return users;
         }
 
-        public async Task<UserDto> GetUser(int? id)
+        public async Task<User> GetUser(GetUserQuery command)
         {
-            UserDto? user = _mapper.Map<UserDto>(await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == id));
+
+            User? user = await _cache.GetRecordAsync<User>($"User_{command.userId}");
+            if (user is null)
+            {
+                user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == command.userId);
+                await _cache.SetRecordAsync($"User_{command.userId}", user);
+            }
+
             if (user is null) throw new BadHttpRequestException("User not found");
-            return user!;
+            return user;
         }
-        public async Task<User> CreateUser(User createUserDto)
+        public async Task<Task> CreateUser(CreateUserCommand command)
         {
             User newUser = new User()
             {
-                Name = createUserDto.Name,
-                Surname = createUserDto.Surname,
-                BirthDate = createUserDto.BirthDate,
-                Gender = createUserDto.Gender,             
+                Name = command.user.Name,
+                Surname = command.user.Surname,
+                BirthDate = command.user.BirthDate,
+                Gender = command.user.Gender,             
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return newUser;
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> DeleteUser(int? userId)
+        public async Task<Task> DeleteUser(DeleteUserCommand command)
         {
-            User? userToDelete = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            User? userToDelete = await _context.Users.FirstOrDefaultAsync(u => u.UserId == command.UserId);
             if (userToDelete is null) throw new BadHttpRequestException("User not found");
-            return true;
+            _context.Remove(userToDelete);
+            await _cache.DeleteRecordAsync<User>($"User_{userToDelete.UserId}");
+            return Task.CompletedTask;
         }
 
-        public async Task<User> UpdateUser(User updateUserDto, int? userId)
+        public async Task<Task> UpdateUser(UpdateUserCommand command)
         {
-            User? currentUser = await _context.Users.SingleAsync(r => r.UserId == userId);
 
+            User? currentUser = await _context.Users.FirstOrDefaultAsync(r => r.UserId == command.user.UserId);
             if (currentUser is null) throw new BadHttpRequestException("Bad");
 
-            currentUser.Name = updateUserDto.Name;
-            currentUser.Surname = updateUserDto.Surname;
-            currentUser.BirthDate = updateUserDto.BirthDate;
-            currentUser.Gender = updateUserDto.Gender;
-
-            _context.SaveChanges();
-            return currentUser;
+            currentUser.Name = command.user.Name;
+            currentUser.Surname = command.user.Surname;
+            currentUser.BirthDate = command.user.BirthDate;
+            currentUser.Gender = command.user.Gender;
+            await _context.SaveChangesAsync();
+            await _cache.DeleteRecordAsync<UserDto>($"User_{command.user.UserId}");
+            return Task.CompletedTask;
         }
 
         public async Task<List<User>> GetUsersForRaport()
         {
             List<User> allUsersForRaport = await _context.Users.ToListAsync();
-
             return allUsersForRaport;
         }
     }

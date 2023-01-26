@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using AutoMapper;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
-using Newtonsoft.Json;
+using RekrutacjaApp.Commands;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Models;
+using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
+using RekrutacjaApp.Repository;
 using System.Diagnostics;
 using System.Net;
 
@@ -15,21 +19,34 @@ namespace RekrutacjaApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IUserRepository _userRepository;
+        private readonly IMediator _mediatr;
         private readonly IMemoryCache _memoryCache;
+        private readonly IUserRepository _userRepository;
+        private IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, IUserRepository userRepository, IMemoryCache memoryCache)
+        public HomeController
+            (
+                ILogger<HomeController> logger,
+                IMemoryCache memoryCache, 
+                IUnitOfWork unitOfWork, 
+                IMapper mapper, 
+                IMediator mediatr, 
+                IUserRepository userRepository
+            )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _mediatr = mediatr ?? throw new ArgumentNullException(nameof(mediatr));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         [HttpGet]
         public async Task<IActionResult> GenerateRaport()
         {
-            List<User>? users = await _userRepository.GetUsersForRaport();
-
+            List<UserDto>? users = await _mediatr.Send(new GetUsersQuery());
             var reportDate = DateTime.Now;
             var reportName = $"report_{reportDate.ToString("yyyy-MM-dd_HH-mm-ss")}.csv";
             using (var writer = new StreamWriter(reportName))
@@ -40,7 +57,6 @@ namespace RekrutacjaApp.Controllers
                     writer.WriteLine("{0},{1},{2},{3},{4}", user.Title,user.DisplayName, user.BirthDate.ToString("yyyy-MM-dd"), user.Age, user.Gender);
                 }
             }
-
             return Ok();
         }
 
@@ -51,88 +67,96 @@ namespace RekrutacjaApp.Controllers
             {
                 return Json($"A user named {firstName} {lastName} already exists.");
             }
-
             return Json(true);
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<UserDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams queryParams)
+        public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams stringParameters)
         {
-
-            string key = JsonConvert.SerializeObject(queryParams);
-
-            var cachedValue = await _memoryCache.GetOrCreateAsync(
-                key,
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(3);
-                    return await _userRepository.GetUsers(queryParams);
-                });
-
-            return View(cachedValue);
+            GetUsersQuery getUsersQuery = new()
+            {
+                queryParams = stringParameters
+            };
+            List<UserDto>? users = await _mediatr.Send(getUsersQuery);
+            if(users is null) NotFound("No users");        
+            return View(users);
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(UserDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UserDto>> GetUser([FromRoute] int? id)
+        public async Task<ActionResult<UserDto>> Details([FromRoute] int id)
         {
-
-            if (id is null) return NotFound();
-
-            string key = JsonConvert.SerializeObject($"User_{id}");
-
-            var cachedValue = await _memoryCache.GetOrCreateAsync(
-                key,
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(3);
-                    return await _userRepository.GetUser(id);
-                });
-
-            if (cachedValue is null) return NotFound();
-
-            return cachedValue;
+            GetUserQuery getUserQuery = new()
+            {
+                userId= id
+            };
+            UserDto user = await _mediatr.Send(getUserQuery);
+            if (user is null) return NotFound("User not found!");
+            return View(user);
         }
-
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender")] User createUserDto)
+        public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender")] User createUser)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            User? newUser = await _userRepository.CreateUser(createUserDto);
-
+            CreateUserCommand createUserCommand = new()
+            {
+                user = createUser,
+            };
+            await _mediatr.Send(createUserCommand);
             return RedirectToAction(nameof(Index));
         }
 
         [HttpDelete]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<bool>> DeleteUser([FromRoute] int? userId)
+        public async Task<ActionResult<bool>> Delete([FromRoute] int userId)
         {
-            if (userId is null) return NotFound();
-            await _userRepository.DeleteUser(userId);
-            return true;
+            try
+            {
+                DeleteUserCommand deleteUserCommand = new()
+                {
+                    UserId= userId
+                };
+                await _mediatr.Send(deleteUserCommand);    
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                return RedirectToAction(nameof(Index));
+            }         
         }
 
         [HttpPut]
+        [AutoValidateAntiforgeryToken]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<User>> UpdateUser([FromBody] User updateUserDto, [FromRoute] int? userId)
+        public async Task<ActionResult<User>> UpdateUser([FromForm][Bind(include: "Name,Surname,BirthDate,Gender")] User updateUser, [FromRoute] int userId)
         {
-            User? currentUser = await _userRepository.UpdateUser(updateUserDto, userId);
-            if (currentUser is null) return NotFound("Not found");
-            currentUser.Name = updateUserDto.Name;
-            currentUser.Surname = updateUserDto.Surname;
-            currentUser.BirthDate = updateUserDto.BirthDate;
-            currentUser.Gender = updateUserDto.Gender;
-            return Ok(currentUser);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try
+            {
+                UpdateUserCommand updateUserCommand = new()
+                {
+                    UserId = userId,
+                    user= updateUser,
+                };
+                await _mediatr.Send(updateUserCommand);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

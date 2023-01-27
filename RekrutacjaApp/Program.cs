@@ -25,7 +25,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
 builder.Services.AddControllersWithViews();

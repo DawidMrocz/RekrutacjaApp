@@ -8,28 +8,35 @@ namespace RekrutacjaApp.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        public IGenericRepository<UserDto> userRepository;
-
-        public IGenericRepository<UserDto> UserRepository
+        private IGenericRepository<User> _users;
+        public UnitOfWork(ApplicationDbContext context)
         {
-            get
-            {
-                if (this.userRepository == null)
-                {
-                    this.userRepository = new GenericRepository<UserDto>(_context);
-                }
-                return userRepository;
-            }
+            _context = context;
+            //_userRepository = new GenericRepository<User>(_context);
+
         }
 
-        public async void Save()
+        public IGenericRepository<User> Users => _users ??= new GenericRepository<User>(_context);
+        //public IGenericRepository<User> UserRepository
+        //{
+        //    get
+        //    {
+        //        if (this.userRepository == null)
+        //        {
+        //            this.userRepository = new GenericRepository<User>(_context);
+        //        }
+        //        return userRepository;
+        //    }
+        //}
+
+        public async Task Save()
         {
             await _context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            Dispose(true);
+            _context.Dispose();
 
             GC.SuppressFinalize(this);
         }

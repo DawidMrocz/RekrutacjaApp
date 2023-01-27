@@ -3,112 +3,169 @@
     ViewData["Title"] = "Home Page";
 }
 
-<button type="button" class="button-62" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    Nowe zadanie
-</button>
+
+
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Nowe zadanie</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Nowy użytkownik</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form class="row g-3" method="post" asp-action="CreateUser" asp-controller="Home">
-                    <div class="col-md-6">
-                        <label for="Name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="Name" name="Name" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="Surname" class="form-label">Surname</label>
-                        <input type="text" class="form-control" id="Surname" name="Surname" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="BirthDate" class="form-label">Date Of Birth</label>
-                        <div><input type="date" class="form-control" name="BirthDate" required></div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="Gender" class="form-label">Gender</label>
-                        <select id="iGender" class="form-select" name="Gender" required>
-                            <option selected value="M">Mężczyzna</option>
-                            <option value="F">Kobieta</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
+                <form class="row g-3">
                     
-                </form>
+    
+
+                      <div class="col-md-4">
+                        <label for="Name" class="form-label">Imię</label>
+                        <input type="text" class="form-control is-valid" id="Name" placeholder="Imię..." required>
+                        <div class="valid-feedback">
+                          Looks good!
+                        </div>
+                      </div>
+                      <div class="col-md-5">
+                        <label for="Surname" class="form-label">Nazwisko</label>
+                        <input type="text" class="form-control is-valid" id="Surname" placeholder="Nazwisko..." required>
+                        <div class="valid-feedback">
+                          Looks good!
+                        </div>
+                      </div>
+                      <div class="col-md-5">
+                        <label for="validationServer03" class="form-label">Date urodzenia</label>
+                        <input type="date" class="form-control is-invalid" id="validationServer03" aria-describedby="validationServer03Feedback" required>
+                        <div id="validationServer03Feedback" class="invalid-feedback">
+                          Please provide a valid city.
+                        </div>
+                      </div>
+                      <div class="col-md-5">
+                        <label for="validationServer04" class="form-label">Płeć</label>
+                                            <select class="form-select" aria-label="Default select example">
+                                                <option selected value="1">Mężczyzna</option>
+                                                <option value="2">Kobieta</option>
+                                                <option value="3">Inne</option>
+                                            </select>
+                      </div>
+
+
+                    <div class="col-md-4">
+                        <label for="Name" class="form-label">Cecha</label>
+                        <input type="text" class="form-control is-valid" id="Name" placeholder="Nazwa cechy..." required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="Surname" class="form-label">Wartość</label>
+                        <input type="text" class="form-control is-valid" id="Surname" placeholder="..." required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                      <div class="col-12">
+                        <button class="btn btn-primary" type="submit">Submit form</button>
+                      </div>
+                    </form>
             </div>
 
         </div>
     </div>
 </div>
 
+<div class="row justify-content-between">
+
+        
+        <div class="col">
+            <button type="button" class="btn btn-outline-success" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Dodaj użytkownika
+            </button>
+        <button type="button" class="btn btn-outline-warning" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Wygeneruj raport
+        </button>
+        </div>
+    <div class="col-3">
+        <form class="d-flex" role="search">
+            <button class="btn btn-outline-success" style="margin:10px 10px 10px 10px" type="submit">Szukaj</button>
+            <input class="form-control me-2" style="margin:10px 0px 10px 0px" type="search" placeholder="Nazwa" aria-label="Search">
+            
+        </form>
+    </div>
+</div>
+
+<div class="row justify-content-start">
+    <div class="col-1">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Filtruj
+        </button>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-select" aria-label="Default select example">
+            <option selected disabled>Wybierz płeć</option>
+            <option value="1">Mężczyzna</option>
+            <option value="2">Kobieta</option>
+            <option value="3">Inne</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-select" aria-label="Default select example">
+            <option selected disabled>Wybierz wiek</option>
+            <option value="1"> 0 - 10</option>
+            <option value="2">10 - 20</option>
+            <option value="3">20 - 30</option>
+            <option value="2">30 - 40</option>
+            <option value="3">40 - 90</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-select" aria-label="Default select example">
+            <option selected disabled>Prawo jazdy</option>
+            <option value="1">Tak</option>
+            <option value="2">Nie</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-select" aria-label="Default select example">
+            <option selected disabled>Sortuj według</option>
+            <option value="1">Imię</option>
+            <option value="2">Nazwisko</option>
+        </select>
+    </div>
+    
+</div>
+
 <table class="table table-striped">
     <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Surname</th>
-            <th scope="col">Date Of Birth</th>
-            <th scope="col">Gender</th>
+            <th scope="col">Imie i Nazwisko</th>
+            <th scope="col">Data urodzenia</th>
+            <th scope="col">Wiek</th>
+            <th scope="col">Płeć</th>
+            <th scope="col">Prawo jazdy</th>
+
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>g</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>d</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-            <td>the Bird</td>
-            <td>f</td>
-        </tr>
+        @foreach(var user in Model)
+        {
+            <tr>
+                <th scope="row"><a asp-action="Details" asp-controller="Home" asp-route-id="@user.UserId">@user.DisplayName</a></th>
+                <td>@user.BirthDate</td>
+                <td>@user.Age</td>
+                <td>@user.Gender</td>
+                <td>Tak</td>
+            </tr>
+        }      
     </tbody>
 </table>
 
 
-
-<form method="post">
-    <div>
-        <label for="FirstName">Imię:</label>
-        <input type="text" id="FirstName" name="FirstName" required />
-    </div>
-    <div>
-        <label for="LastName">Nazwisko:</label>
-        <input type="text" id="LastName" name="LastName" required />
-    </div>
-    <div>
-        <label for="DateOfBirth">Data urodzenia:</label>
-        <input type="date" id="DateOfBirth" name="DateOfBirth" required />
-    </div>
-    <div>
-        <label for="Gender">Płeć:</label>
-        <select id="Gender" name="Gender" required>
-            <option value="M">Mężczyzna</option>
-            <option value="F">Kobieta</option>
-        </select>
-    </div>
-    <div>
-        <input type="submit" value="Utwórz" />
-    </div>
-</form>
-
-<form method="post">
+@*<form method="post">
     <div id="key-value-pairs">
         <div>
             <label for="Key">Key:</label>
@@ -130,4 +187,4 @@
     @Html.AntiForgeryToken()
 
     <!-- ... -->
-</form>
+</form>*@

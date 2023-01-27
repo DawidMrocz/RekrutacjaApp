@@ -18,7 +18,7 @@ namespace RekrutacjaApp.Commands
 
         public Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.UserRepository.Create(request.user);
+            _unitOfWork.Users.Create(request.user);
             return Task.FromResult(Unit.Value);
         }
     }

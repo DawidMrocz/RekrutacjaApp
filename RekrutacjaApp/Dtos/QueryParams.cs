@@ -9,7 +9,7 @@ namespace MyWebApplication.Dtos
         public int? AgeMin { get; set; }
         public string? SortOrder { get; set; }
         public Gender? Gender { get; set; }
-        public int page { get; set; } = 1;
-        public int pageSize { get; set; } = 10;
+        //public int page { get; set; } = 1;
+        //public int pageSize { get; set; } = 10;
     }
 }

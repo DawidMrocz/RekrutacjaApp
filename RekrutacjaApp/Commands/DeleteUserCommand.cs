@@ -18,7 +18,7 @@ namespace RekrutacjaApp.Commands
 
         public Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.UserRepository.Delete(request.UserId);
+            _unitOfWork.Users.Delete(request.UserId);
             return Task.FromResult(Unit.Value);
         }
     }

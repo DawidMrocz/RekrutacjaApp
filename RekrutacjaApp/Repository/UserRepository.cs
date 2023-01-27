@@ -9,15 +9,16 @@ using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Helpers;
 using RekrutacjaApp.Queries;
+using RekrutacjaApp.Repository;
 
 namespace RekrutacjaApp.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly ApplicationDbContext _context;      
         private readonly IDistributedCache _cache;
 
-        public UserRepository(ApplicationDbContext context,IDistributedCache cache)
+        public UserRepository(ApplicationDbContext context,IDistributedCache cache):base(context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -32,51 +33,57 @@ namespace RekrutacjaApp.Repositories
             return true;
         }
 
-        public async Task<List<User>> GetUsers(GetUsersQuery command)
+        //public async Task<List<User>> GetUsers(GetUsersQuery command)
+        //{
+        //    string key = JsonConvert.SerializeObject(command.queryParams);
+        //    List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
+        //    if (users is null)
+        //    {
+
+        //        var query = _context.Users
+        //        .Include(attr => attr.CustomAttributes)
+        //        .AsQueryable();
+
+        //        if (!string.IsNullOrEmpty(command.queryParams.SearchString))
+        //        {
+        //            query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString));
+        //        };
+
+        //        if (command.queryParams.AgeMin is not null)
+        //        {
+        //            query = query.Where(u => u.Age >= command.queryParams.AgeMin);
+        //        };
+
+        //        if (command.queryParams.AgeMax is not null)
+        //        {
+        //            query = query.Where(u => u.Age <= command.queryParams.AgeMax);
+        //        };
+
+        //        switch (command.queryParams.SortOrder)
+        //        {
+        //            case "name":
+        //                query = query.OrderBy(u => u.Name); break;
+        //            case "surname":
+        //                query = query.OrderBy(s => s.Surname); break;
+        //            default:
+        //                break;
+        //        }
+
+        //        var totalCount = await query.CountAsync();
+        //        users = await query
+        //            .Skip((command.queryParams.page - 1) * command.queryParams.pageSize)
+        //            .Take(command.queryParams.pageSize)
+        //            .AsNoTracking()
+        //            .ToListAsync();
+
+        //        await _cache.SetRecordAsync(key, users);
+        //    }         
+        //    return users;
+        //}
+
+        public async Task<List<User>> GetUsers()
         {
-            string key = JsonConvert.SerializeObject(command.queryParams);
-            List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
-            if (users is null)
-            {
-
-                var query = _context.Users
-                .Include(attr => attr.CustomAttributes)
-                .AsQueryable();
-
-                if (!string.IsNullOrEmpty(command.queryParams.SearchString))
-                {
-                    query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString));
-                };
-
-                if (command.queryParams.AgeMin is not null)
-                {
-                    query = query.Where(u => u.Age >= command.queryParams.AgeMin);
-                };
-
-                if (command.queryParams.AgeMax is not null)
-                {
-                    query = query.Where(u => u.Age <= command.queryParams.AgeMax);
-                };
-
-                switch (command.queryParams.SortOrder)
-                {
-                    case "name":
-                        query = query.OrderBy(u => u.Name); break;
-                    case "surname":
-                        query = query.OrderBy(s => s.Surname); break;
-                    default:
-                        break;
-                }
-
-                var totalCount = await query.CountAsync();
-                users = await query
-                    .Skip((command.queryParams.page - 1) * command.queryParams.pageSize)
-                    .Take(command.queryParams.pageSize)
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                await _cache.SetRecordAsync(key, users);
-            }         
+            var users = await _context.Users.ToListAsync();
             return users;
         }
 

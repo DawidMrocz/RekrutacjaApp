@@ -70,17 +70,31 @@ namespace RekrutacjaApp.Controllers
             return Json(true);
         }
 
+        //[HttpGet]
+        //[ProducesResponseType(typeof(List<UserDto>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType((int)HttpStatusCode.NotFound)]
+        //public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams? stringParameters)
+        //{
+        //    GetUsersQuery getUsersQuery = new()
+        //    {
+        //        queryParams = stringParameters
+        //    };
+        //    List<UserDto>? users = await _mediatr.Send(getUsersQuery);
+        //    if(users is null) NotFound("No users");        
+        //    return View(users);
+        //}
+
         [HttpGet]
         [ProducesResponseType(typeof(List<UserDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams stringParameters)
+        public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams? stringParameters)
         {
             GetUsersQuery getUsersQuery = new()
             {
                 queryParams = stringParameters
             };
             List<UserDto>? users = await _mediatr.Send(getUsersQuery);
-            if(users is null) NotFound("No users");        
+            if (users is null) NotFound("No users");
             return View(users);
         }
 

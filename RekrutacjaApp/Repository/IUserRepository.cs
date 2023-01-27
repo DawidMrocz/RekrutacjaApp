@@ -4,13 +4,15 @@ using RekrutacjaApp.Commands;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Queries;
+using RekrutacjaApp.Repository;
 
 namespace RekrutacjaApp.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository: IGenericRepository<User>
     {
         public Task<User> GetUser(GetUserQuery query);      
-        public Task<List<User>> GetUsers(GetUsersQuery query);
+        //public Task<List<User>> GetUsers(GetUsersQuery query);
+        public Task<List<User>> GetUsers();
         public Task<Task> CreateUser(CreateUserCommand command);
         public Task<Task> UpdateUser(UpdateUserCommand command);
         public Task<Task> DeleteUser(DeleteUserCommand command);

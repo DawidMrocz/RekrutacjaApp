@@ -21,9 +21,13 @@ namespace RekrutacjaApp.Queries
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        //public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+        //{
+        //    return _mapper.Map<List<UserDto>>(await _unitOfWork.UserRepository.GetAll(request.queryParams));
+        //}
         public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            return _mapper.Map<List<UserDto>>(await _unitOfWork.UserRepository.GetAll(request.queryParams));
+            return _mapper.Map<List<UserDto>>(await _unitOfWork.Users.GetAll());
         }
     }
 }

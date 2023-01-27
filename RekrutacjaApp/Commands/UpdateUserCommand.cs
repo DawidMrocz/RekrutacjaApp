@@ -20,7 +20,7 @@ namespace RekrutacjaApp.Commands
 
         public Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.UserRepository.Update(request.user,request.UserId);
+            _unitOfWork.Users.Update(request.user,request.UserId);
             return Task.FromResult(Unit.Value);
         }
     }

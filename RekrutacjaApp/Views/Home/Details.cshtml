@@ -1,6 +1,138 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@model RekrutacjaApp.Dtos.UserDto
+@{
+    ViewData["Title"] = Model.DisplayName;
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<h1>@Model.DisplayName</h1>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Edytuj użytkownika: @Model.DisplayName</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-md-4">
+                        <label for="Name" class="form-label">Imię</label>
+                        <input type="text" class="form-control is-valid" id="Name" value="@Model.Name" placeholder="Imię..." required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="Surname" class="form-label">Nazwisko</label>
+                        <input type="text" class="form-control is-valid" id="Surname" value="@Model.Surname" placeholder="Nazwisko..." required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="validationServer03" class="form-label">Date urodzenia</label>
+                        <input type="date" class="form-control is-invalid" id="validationServer03" value="@Model.BirthDate" aria-describedby="validationServer03Feedback" required>
+                        <div id="validationServer03Feedback" class="invalid-feedback">
+                            Please provide a valid city.
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="validationServer04" class="form-label">Płeć</label>
+                        <select class="form-select" aria-label="Default select example">
+
+                            <option selected value="1">@Model.Gender</option>
+                            <option value="2">Kobieta</option>
+                            <option value="3">Inne</option>
+                        </select>
+                        <div id="validationServer04Feedback" class="invalid-feedback">
+                            Please select a valid state.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                        <button type="button" class="btn btn-primary">Edytuj</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="mb-3">
+    <p><b>Data urodzenia: </b>@Model.BirthDate</p>
+</div>
+
+<div class="mb-3">
+    <p><b>Płeć: </b>@Model.Gender</p>
+</div>
+
+
+    <div class="mb-3">
+        <ol class="list-group list-group-numbered">
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Subheading</div>
+                    Content for list item
+                </div>
+                 
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Subheading</div>
+                    Content for list item
+                </div>
+                 
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">Subheading</div>
+                    Content for list item
+                </div>
+                 
+            </li>
+        </ol>
+    </div>
+
+<div class="row justify-content-start">
+    <div class="col-2">
+        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Edytuj użytkownika
+        </button>
+    </div>
+    <div class="col-2">
+
+        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+            Usuń użytkownika
+        </button>
+    </div>
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Usuń użykownika</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Czy napewno chcesz usunąć użytkownika @Model.DisplayName?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <button type="button" class="btn btn-primary">Usuń</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

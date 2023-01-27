@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using RekrutacjaApp.Dtos;
-using RekrutacjaApp.Entities;
 using RekrutacjaApp.Repository;
 
 namespace RekrutacjaApp.Queries
@@ -22,7 +21,7 @@ namespace RekrutacjaApp.Queries
 
         public async Task<UserDto> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
-            return _mapper.Map<UserDto>(await _unitOfWork.UserRepository.GetById(request.userId));
+            return _mapper.Map<UserDto>(await _unitOfWork.Users.GetById(request.userId));
         }
     }
 }

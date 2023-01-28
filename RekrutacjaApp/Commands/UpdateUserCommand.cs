@@ -1,27 +1,33 @@
 ﻿using MediatR;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
-using RekrutacjaApp.Repository;
+using RekrutacjaApp.Repositories;
+
 
 namespace RekrutacjaApp.Commands
 {
-    public record UpdateUserCommand : IRequest<Unit>
+    public record UpdateUserCommand : IRequest<bool>
     {
         public int UserId { get; set; }
-        public required User user { get; set; }
+        public User user { get; set; }
     }
-    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
+    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand,bool>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
+        //private readonly IUnitOfWork _unitOfWork;
+        //public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
+        //{
+        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        //}
+        private readonly IUserRepository _userRepository;
+        public UpdateUserCommandHandler(IUserRepository userRepository)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.Users.Update(request.user,request.UserId);
-            return Task.FromResult(Unit.Value);
+            await _userRepository.UpdateUser(request);
+            return true;
         }
     }
 }

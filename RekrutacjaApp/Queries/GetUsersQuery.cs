@@ -3,7 +3,8 @@ using MediatR;
 using MyWebApplication.Dtos;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
-using RekrutacjaApp.Repository;
+using RekrutacjaApp.Repositories;
+
 
 namespace RekrutacjaApp.Queries
 {
@@ -13,21 +14,27 @@ namespace RekrutacjaApp.Queries
     }
     public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserDto>>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        //private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserRepository _userRepostiory;
         private readonly IMapper _mapper;
-        public GetUsersQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        //public GetUserQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        //{
+        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        //    _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        //}
+
+        public GetUsersQueryHandler(IUserRepository userRepostiory, IMapper mapper)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userRepostiory = userRepostiory ?? throw new ArgumentNullException(nameof(userRepostiory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        //public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
-        //{
-        //    return _mapper.Map<List<UserDto>>(await _unitOfWork.UserRepository.GetAll(request.queryParams));
-        //}
+
         public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            return _mapper.Map<List<UserDto>>(await _unitOfWork.Users.GetAll());
+            //return _mapper.Map<List<UserDto>>(await _unitOfWork.Users.GetAll(request.queryParams));
+            return _mapper.Map<List<UserDto>>(await _userRepostiory.GetUsers(request));
         }
+
     }
 }

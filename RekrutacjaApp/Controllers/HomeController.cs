@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
 using RekrutacjaApp.Commands;
+using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Models;
 using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
-using RekrutacjaApp.Repository;
 using System.Diagnostics;
 using System.Net;
 
@@ -22,34 +22,38 @@ namespace RekrutacjaApp.Controllers
         private readonly IMediator _mediatr;
         private readonly IMemoryCache _memoryCache;
         private readonly IUserRepository _userRepository;
-        private IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;
 
         public HomeController
             (
                 ILogger<HomeController> logger,
-                IMemoryCache memoryCache, 
-                IUnitOfWork unitOfWork, 
-                IMapper mapper, 
-                IMediator mediatr, 
-                IUserRepository userRepository
+                IMemoryCache memoryCache,
+                IMapper mapper,
+                IMediator mediatr,
+                IUserRepository userRepository,
+                ApplicationDbContext context
             )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _mediatr = mediatr ?? throw new ArgumentNullException(nameof(mediatr));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _context = context;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> GenerateRaport()
         {
-            List<UserDto>? users = await _mediatr.Send(new GetUsersQuery());
+            List<UserDto>? users = _mapper.Map<List<UserDto>>(await _context.Users.AsNoTracking().ToListAsync());
             var reportDate = DateTime.Now;
-            var reportName = $"report_{reportDate.ToString("yyyy-MM-dd_HH-mm-ss")}.csv";
-            using (var writer = new StreamWriter(reportName))
+            string desktopPath = Environment.GetFolderPath(
+                         System.Environment.SpecialFolder.DesktopDirectory);
+
+            string name = $"{reportDate.ToString("yyyy-MM-dd_HH-mm-ss")}.txt";
+
+            using (var writer = new StreamWriter(Path.Combine(desktopPath, name)))
             {
                 writer.WriteLine("Imię,Nazwisko,Data urodzenia,Płeć,Tytuł,Wiek");
                 foreach (var user in users)
@@ -57,36 +61,10 @@ namespace RekrutacjaApp.Controllers
                     writer.WriteLine("{0},{1},{2},{3},{4}", user.Title,user.DisplayName, user.BirthDate.ToString("yyyy-MM-dd"), user.Age, user.Gender);
                 }
             }
-            return Ok();
+            return RedirectToAction(nameof(Index));
         }
-
-        [AcceptVerbs("GET", "POST")]
-        public async Task<ActionResult> VerifyName(string firstName, string lastName)
-        {
-            if (await _userRepository.VerifyName(firstName, lastName))
-            {
-                return Json($"A user named {firstName} {lastName} already exists.");
-            }
-            return Json(true);
-        }
-
-        //[HttpGet]
-        //[ProducesResponseType(typeof(List<UserDto>), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType((int)HttpStatusCode.NotFound)]
-        //public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams? stringParameters)
-        //{
-        //    GetUsersQuery getUsersQuery = new()
-        //    {
-        //        queryParams = stringParameters
-        //    };
-        //    List<UserDto>? users = await _mediatr.Send(getUsersQuery);
-        //    if(users is null) NotFound("No users");        
-        //    return View(users);
-        //}
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<UserDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<List<UserDto>>> Index([FromQuery] QueryParams? stringParameters)
         {
             GetUsersQuery getUsersQuery = new()
@@ -113,13 +91,13 @@ namespace RekrutacjaApp.Controllers
         }
 
         [HttpPost]
-        [AutoValidateAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender")] User createUser)
+        public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User createUser)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            CreateUserCommand createUserCommand = new()
+            CreateUserCommand createUserCommand = new CreateUserCommand()
             {
                 user = createUser,
             };
@@ -127,50 +105,64 @@ namespace RekrutacjaApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpDelete]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<bool>> Delete([FromRoute] int userId)
-        {
-            try
-            {
-                DeleteUserCommand deleteUserCommand = new()
-                {
-                    UserId= userId
-                };
-                await _mediatr.Send(deleteUserCommand);    
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateException /* ex */)
-            {
-                return RedirectToAction(nameof(Index));
-            }         
-        }
-
-        [HttpPut]
-        [AutoValidateAntiforgeryToken]
-        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<User>> UpdateUser([FromForm][Bind(include: "Name,Surname,BirthDate,Gender")] User updateUser, [FromRoute] int userId)
+        public async Task<IActionResult> AddAttribute([FromForm][Bind(include:"Name,Value")] CustomAttributeDto myattribute, [FromRoute] int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            try
+            AddAttributeCommand addAttributeCommand = new()
             {
-                UpdateUserCommand updateUserCommand = new()
+                Id = id,
+                attribute = myattribute
+            };
+            await _mediatr.Send(addAttributeCommand);
+            return RedirectToAction("Details", new { id = id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> RemoveAttribute([FromRoute] int id)
+        {
+            RemoveAttributeCommand removeAttributeCommand = new RemoveAttributeCommand()
+            {
+                Id = id
+            };
+            await _mediatr.Send(removeAttributeCommand);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            DeleteUserCommand deleteUserCommand = new DeleteUserCommand()
                 {
-                    UserId = userId,
+                    UserId= id
+                };
+                await _mediatr.Send(deleteUserCommand);    
+                return RedirectToAction(nameof(Index));    
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> UpdateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User updateUser, [FromRoute] int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+                UpdateUserCommand updateUserCommand = new UpdateUserCommand()
+                {
+                    UserId =id,
                     user= updateUser,
                 };
                 await _mediatr.Send(updateUserCommand);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateException /* ex */)
-            {
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
-            }
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", new { id = id });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

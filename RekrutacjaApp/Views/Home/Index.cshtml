@@ -3,10 +3,6 @@
     ViewData["Title"] = "Home Page";
 }
 
-
-
-
-<!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -15,55 +11,35 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form class="row g-3">
-                    
-    
-
-                      <div class="col-md-4">
+                <form class="row g-3" method="post" asp-action="CreateUser" asp-controller="Home">
+                    <div class="col-md-6">
                         <label for="Name" class="form-label">Imię</label>
-                        <input type="text" class="form-control is-valid" id="Name" placeholder="Imię..." required>
-                        <div class="valid-feedback">
-                          Looks good!
-                        </div>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Imię..." required>
                       </div>
-                      <div class="col-md-5">
+                      <div class="col-md-6">
                         <label for="Surname" class="form-label">Nazwisko</label>
-                        <input type="text" class="form-control is-valid" id="Surname" placeholder="Nazwisko..." required>
-                        <div class="valid-feedback">
-                          Looks good!
-                        </div>
+                        <input type="text" class="form-control" id="Surname" name="Surname" placeholder="Nazwisko..." required>
                       </div>
-                      <div class="col-md-5">
+                      <div class="col-md-6">
                         <label for="validationServer03" class="form-label">Date urodzenia</label>
-                        <input type="date" class="form-control is-invalid" id="validationServer03" aria-describedby="validationServer03Feedback" required>
-                        <div id="validationServer03Feedback" class="invalid-feedback">
-                          Please provide a valid city.
-                        </div>
+                        <input type="date" class="form-control" id="validationServer03" name="BirthDate" aria-describedby="validationServer03Feedback" required>
                       </div>
-                      <div class="col-md-5">
+                      <div class="col-md-6">
                         <label for="validationServer04" class="form-label">Płeć</label>
-                                            <select class="form-select" aria-label="Default select example">
-                                                <option selected value="1">Mężczyzna</option>
-                                                <option value="2">Kobieta</option>
-                                                <option value="3">Inne</option>
-                                            </select>
+                        <select class="form-select" aria-label="Default select example" name="Gender">
+                            <option selected value="Mężczyzna">Mężczyzna</option>
+                            <option value="Kobieta">Kobieta</option>
+                        </select>
                       </div>
-
-
-                    <div class="col-md-4">
-                        <label for="Name" class="form-label">Cecha</label>
-                        <input type="text" class="form-control is-valid" id="Name" placeholder="Nazwa cechy..." required>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
+                    <div class="col-md-10">
+                        <label for="validationServer04" class="form-label">Prawo jazdy</label>
+                        <select class="form-select" aria-label="Default select example" name="CarLicense">
+                            <option selected disabled>Prawo jazdy</option>
+                            <option value="true">Tak</option>
+                            <option value="false">Nie</option>
+                        </select>
                     </div>
-                    <div class="col-md-5">
-                        <label for="Surname" class="form-label">Wartość</label>
-                        <input type="text" class="form-control is-valid" id="Surname" placeholder="..." required>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
-                    </div>
+
                       <div class="col-12">
                         <button class="btn btn-primary" type="submit">Submit form</button>
                       </div>
@@ -74,70 +50,59 @@
     </div>
 </div>
 
-<div class="row justify-content-between">
-
-        
-        <div class="col">
+<div class="row justify-content-between">     
+    
+        <form asp-controller="Home" asp-action="GenerateRaport" method="post" class="col">
+            <button type="submit"  class="btn btn-outline-warning" style="margin:10px 0px 10px 0px">
+                Wygeneruj raport
+            </button>
             <button type="button" class="btn btn-outline-success" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Dodaj użytkownika
             </button>
-        <button type="button" class="btn btn-outline-warning" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Wygeneruj raport
-        </button>
-        </div>
+        </form>
+
+
+     
     <div class="col-3">
-        <form class="d-flex" role="search">
+        <form class="d-flex" role="search" method="get" asp-action="Index" asp-controller="Home"  >
             <button class="btn btn-outline-success" style="margin:10px 10px 10px 10px" type="submit">Szukaj</button>
-            <input class="form-control me-2" style="margin:10px 0px 10px 0px" type="search" placeholder="Nazwa" aria-label="Search">
-            
+            <input class="form-control me-2" style="margin:10px 0px 10px 0px" type="search" name="SearchString" placeholder="Nazwa" aria-label="Search">          
         </form>
     </div>
 </div>
 
-<div class="row justify-content-start">
+
+    <form asp-controller="Home" asp-action="Index" method="get" class="row justify-content-start">
     <div class="col-1">
-        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Filtruj
-        </button>
+            <button type="submit" class="btn btn-secondary">
+                Filtruj
+            </button>
     </div>
-
     <div class="col-md-2">
-        <select class="form-select" aria-label="Default select example">
+        <select class="form-select" aria-label="Default select example" name="Gender">
             <option selected disabled>Wybierz płeć</option>
-            <option value="1">Mężczyzna</option>
-            <option value="2">Kobieta</option>
-            <option value="3">Inne</option>
+            <option value="Mężczyzna">Mężczyzna</option>
+            <option value="Kobieta">Kobieta</option>
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-select" aria-label="Default select example">
-            <option selected disabled>Wybierz wiek</option>
-            <option value="1"> 0 - 10</option>
-            <option value="2">10 - 20</option>
-            <option value="3">20 - 30</option>
-            <option value="2">30 - 40</option>
-            <option value="3">40 - 90</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-select" aria-label="Default select example">
+        <select class="form-select" aria-label="Default select example" name="CarLicense">
             <option selected disabled>Prawo jazdy</option>
-            <option value="1">Tak</option>
-            <option value="2">Nie</option>
+            <option value="true">Tak</option>
+            <option value="false">Nie</option>
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-select" aria-label="Default select example">
+        <select class="form-select" aria-label="Default select example" name="SortOrder">
             <option selected disabled>Sortuj według</option>
-            <option value="1">Imię</option>
-            <option value="2">Nazwisko</option>
+            <option value="name">Imię</option>
+            <option value="surname">Nazwisko</option>
         </select>
     </div>
-    
-</div>
+    </form>
+
 
 <table class="table table-striped">
     <thead>
@@ -155,15 +120,22 @@
         {
             <tr>
                 <th scope="row"><a asp-action="Details" asp-controller="Home" asp-route-id="@user.UserId">@user.DisplayName</a></th>
-                <td>@user.BirthDate</td>
+                <td>@user.BirthDate.ToShortDateString()</td>
                 <td>@user.Age</td>
                 <td>@user.Gender</td>
-                <td>Tak</td>
+                @if (@user.CarLicense)
+                {
+                    <td>Tak</td>
+                }
+                else
+                {
+                    <td>Nie</td>
+                }
+                
             </tr>
         }      
     </tbody>
 </table>
-
 
 @*<form method="post">
     <div id="key-value-pairs">

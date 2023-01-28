@@ -12,7 +12,7 @@ using RekrutacjaApp.Data;
 namespace RekrutacjaApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230125211508_Init")]
+    [Migration("20230128140200_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -71,7 +71,7 @@ namespace RekrutacjaApp.Migrations
                             CustomAttributeId = 3,
                             Name = "Kolor kurtki",
                             UserId = 2,
-                            Value = "Nibieski"
+                            Value = "Niebieski"
                         });
                 });
 
@@ -85,6 +85,9 @@ namespace RekrutacjaApp.Migrations
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("CarLicense")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Gender")
                         .IsRequired()
@@ -107,7 +110,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 1,
                             BirthDate = new DateTime(1996, 12, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Male",
+                            CarLicense = true,
+                            Gender = "Mężczyzna",
                             Name = "Dawid",
                             Surname = "Mroczkowski"
                         },
@@ -115,7 +119,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 2,
                             BirthDate = new DateTime(1997, 1, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Male",
+                            CarLicense = true,
+                            Gender = "Mężczyzna",
                             Name = "Adam",
                             Surname = "Nowak"
                         },
@@ -123,7 +128,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 3,
                             BirthDate = new DateTime(1986, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Male",
+                            CarLicense = false,
+                            Gender = "Mężczyzna",
                             Name = "Jan",
                             Surname = "Kowalski"
                         },
@@ -131,7 +137,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 4,
                             BirthDate = new DateTime(1979, 3, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Famale",
+                            CarLicense = false,
+                            Gender = "Kobieta",
                             Name = "Karolina",
                             Surname = "Szpak"
                         },
@@ -139,7 +146,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 5,
                             BirthDate = new DateTime(1944, 12, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Famale",
+                            CarLicense = true,
+                            Gender = "Kobieta",
                             Name = "Wiktoria",
                             Surname = "Kowalska"
                         },
@@ -147,7 +155,8 @@ namespace RekrutacjaApp.Migrations
                         {
                             UserId = 6,
                             BirthDate = new DateTime(1990, 4, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Gender = "Male",
+                            CarLicense = true,
+                            Gender = "Mężczyzna",
                             Name = "Zbigniew",
                             Surname = "Stawik"
                         });

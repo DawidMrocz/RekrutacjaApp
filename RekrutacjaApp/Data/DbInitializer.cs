@@ -21,7 +21,8 @@ namespace RekrutacjaApp.Data
                     Name = "Dawid",
                     Surname = "Mroczkowski",
                     BirthDate = new DateTime(1996, 12, 10),
-                    Gender = Gender.Male,
+                    Gender = Gender.Mężczyzna,
+                    CarLicense = true
 
                 },
                 new User
@@ -30,7 +31,8 @@ namespace RekrutacjaApp.Data
                     Name = "Adam",
                     Surname = "Nowak",
                     BirthDate = new DateTime(1997, 01, 14),
-                    Gender = Gender.Male,
+                    Gender = Gender.Mężczyzna,
+                    CarLicense = true
                 },
                 new User
                 {
@@ -38,7 +40,8 @@ namespace RekrutacjaApp.Data
                     Name = "Jan",
                     Surname = "Kowalski",
                     BirthDate = new DateTime(1986, 7, 21),
-                    Gender = Gender.Male,
+                    Gender = Gender.Mężczyzna,
+                    CarLicense = false
                 },
                 new User
                 {
@@ -46,7 +49,8 @@ namespace RekrutacjaApp.Data
                     Name = "Karolina",
                     Surname = "Szpak",
                     BirthDate = new DateTime(1979, 3, 13),
-                    Gender = Gender.Famale,
+                    Gender = Gender.Kobieta,
+                    CarLicense = false
                 },
                 new User
                 {
@@ -54,7 +58,8 @@ namespace RekrutacjaApp.Data
                     Name = "Wiktoria",
                     Surname = "Kowalska",
                     BirthDate = new DateTime(1944, 12, 21),
-                    Gender = Gender.Famale,
+                    Gender = Gender.Kobieta,
+                    CarLicense = true
                 },
                 new User
                 {
@@ -62,9 +67,10 @@ namespace RekrutacjaApp.Data
                     Name = "Zbigniew",
                     Surname = "Stawik",
                     BirthDate = new DateTime(1990, 4, 13),
-                    Gender = Gender.Male,
+                    Gender = Gender.Mężczyzna,
+                    CarLicense = true
                 }
-             );
+             ); ;
             modelBuilder.Entity<CustomAttribute>().HasData(
                 new CustomAttribute
                 {

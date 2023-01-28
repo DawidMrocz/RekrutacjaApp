@@ -8,6 +8,7 @@ namespace RekrutacjaApp.Dtos
         public UserDtoProfile()
         {
             CreateMap<User, UserDto>();
+            CreateMap<CustomAttribute, CustomAttributeDto>();
         }
     }
 }

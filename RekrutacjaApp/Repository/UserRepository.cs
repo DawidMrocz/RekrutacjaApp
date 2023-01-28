@@ -1,4 +1,6 @@
 ﻿
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using MyWebApplication.Dtos;
@@ -9,125 +11,168 @@ using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Helpers;
 using RekrutacjaApp.Queries;
-using RekrutacjaApp.Repository;
+
 
 namespace RekrutacjaApp.Repositories
 {
-    public class UserRepository : GenericRepository<User>, IUserRepository
+    public class UserRepository :IUserRepository
     {
         private readonly ApplicationDbContext _context;      
         private readonly IDistributedCache _cache;
+        private readonly IMapper _mapper;
 
-        public UserRepository(ApplicationDbContext context,IDistributedCache cache):base(context)
+        public UserRepository(ApplicationDbContext context,IDistributedCache cache, IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> VerifyName(string firstName, string lastName)
+        public bool VerifyName(string firstName, string lastName)
         {
-            bool pairExist = await _context.Users.AnyAsync(u => u.Name == firstName && u.Surname == lastName);
+            bool pairExist = _context.Users.Any(u => u.Name == firstName && u.Surname == lastName);
 
             if (pairExist) return false;
 
             return true;
         }
 
-        //public async Task<List<User>> GetUsers(GetUsersQuery command)
-        //{
-        //    string key = JsonConvert.SerializeObject(command.queryParams);
-        //    List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
-        //    if (users is null)
-        //    {
-
-        //        var query = _context.Users
-        //        .Include(attr => attr.CustomAttributes)
-        //        .AsQueryable();
-
-        //        if (!string.IsNullOrEmpty(command.queryParams.SearchString))
-        //        {
-        //            query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString));
-        //        };
-
-        //        if (command.queryParams.AgeMin is not null)
-        //        {
-        //            query = query.Where(u => u.Age >= command.queryParams.AgeMin);
-        //        };
-
-        //        if (command.queryParams.AgeMax is not null)
-        //        {
-        //            query = query.Where(u => u.Age <= command.queryParams.AgeMax);
-        //        };
-
-        //        switch (command.queryParams.SortOrder)
-        //        {
-        //            case "name":
-        //                query = query.OrderBy(u => u.Name); break;
-        //            case "surname":
-        //                query = query.OrderBy(s => s.Surname); break;
-        //            default:
-        //                break;
-        //        }
-
-        //        var totalCount = await query.CountAsync();
-        //        users = await query
-        //            .Skip((command.queryParams.page - 1) * command.queryParams.pageSize)
-        //            .Take(command.queryParams.pageSize)
-        //            .AsNoTracking()
-        //            .ToListAsync();
-
-        //        await _cache.SetRecordAsync(key, users);
-        //    }         
-        //    return users;
-        //}
-
-        public async Task<List<User>> GetUsers()
+        public async Task<List<User>> GetUsers(GetUsersQuery command)
         {
-            var users = await _context.Users.ToListAsync();
+            string key = JsonConvert.SerializeObject(command.queryParams);
+            Console.WriteLine(key);
+            Console.WriteLine(key);
+            Console.WriteLine(key);
+
+            Console.WriteLine(key);
+
+            Console.WriteLine(key);
+            List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
+            if (users is null)
+            {
+
+                var query = _context.Users            
+                .AsQueryable();
+
+                if (!string.IsNullOrEmpty(command.queryParams.SearchString))
+                {
+                    query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString)).AsQueryable();
+                };
+
+                if (command.queryParams.CarLicense is not null)
+                {
+                    query = query.Where(u => u.CarLicense == command.queryParams.CarLicense).AsQueryable();
+                };
+
+                if (command.queryParams.Gender is not null)
+                {
+                    query = query.Where(u => u.Gender == command.queryParams.Gender).AsQueryable();
+                };
+
+                switch (command.queryParams.SortOrder)
+                {
+                    case "name":
+                        query = query.OrderBy(u => u.Name).AsQueryable(); ; break;
+                    case "surname":
+                        query = query.OrderBy(s => s.Surname).AsQueryable(); ; break;
+                    default:
+                        break;
+                }
+
+                var totalCount = await query.CountAsync();
+                users = await query
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                await _cache.SetRecordAsync(key, users);
+            }
             return users;
         }
 
-        public async Task<User> GetUser(GetUserQuery command)
+        public async Task<User> AddAttribute(CustomAttributeDto command,int userId)
+        {
+            User? foundedUser = await _context.Users
+                .Include(a => a.CustomAttributes)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            if (foundedUser is null) throw new BadHttpRequestException("User not found");
+            Console.WriteLine(foundedUser.UserId);
+            Console.WriteLine(foundedUser.UserId);
+            Console.WriteLine(foundedUser.UserId);
+
+
+            Console.WriteLine(foundedUser.UserId);
+            CustomAttribute newAttribute = new CustomAttribute()
+            {
+                UserId = foundedUser.UserId,
+                Name = command.Name,
+                Value = command.Value
+            };
+            await _cache.DeleteRecordAsync<User>($"User_{userId}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            await _context.CustomAttributes.AddAsync(newAttribute);
+            await _context.SaveChangesAsync();
+            return foundedUser;
+        }
+
+        public async Task<bool> RemoveAttribute(RemoveAttributeCommand command)
+        {
+            var customAttribute = await _context.CustomAttributes.FirstOrDefaultAsync(i => i.CustomAttributeId == command.Id);
+            if (customAttribute is null) throw new BadHttpRequestException("User not found");
+            _context.CustomAttributes.Remove(customAttribute);
+            await _context.SaveChangesAsync();
+            await _cache.DeleteRecordAsync<User>($"User_{customAttribute.UserId}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return true;
+        }
+
+        public async Task<UserDto> GetUser(GetUserQuery command)
         {
 
-            User? user = await _cache.GetRecordAsync<User>($"User_{command.userId}");
+            UserDto? user = await _cache.GetRecordAsync<UserDto>($"User_{command.userId}");
             if (user is null)
             {
-                user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(i => i.UserId == command.userId);
+                user = await _context.Users.Include(c => c.CustomAttributes)
+                    .AsNoTracking()
+                    .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(i => i.UserId == command.userId);
                 await _cache.SetRecordAsync($"User_{command.userId}", user);
             }
 
             if (user is null) throw new BadHttpRequestException("User not found");
             return user;
         }
-        public async Task<Task> CreateUser(CreateUserCommand command)
+        public async Task<bool> CreateUser(CreateUserCommand command)
         {
             User newUser = new User()
             {
                 Name = command.user.Name,
                 Surname = command.user.Surname,
                 BirthDate = command.user.BirthDate,
-                Gender = command.user.Gender,             
+                Gender = command.user.Gender,
+                CarLicense = command.user.CarLicense
             };
-
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return Task.CompletedTask;
+
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return true;
         }
 
-        public async Task<Task> DeleteUser(DeleteUserCommand command)
+        public async Task<bool> DeleteUser(DeleteUserCommand command)
         {
             User? userToDelete = await _context.Users.FirstOrDefaultAsync(u => u.UserId == command.UserId);
             if (userToDelete is null) throw new BadHttpRequestException("User not found");
             _context.Remove(userToDelete);
+            await _context.SaveChangesAsync();
             await _cache.DeleteRecordAsync<User>($"User_{userToDelete.UserId}");
-            return Task.CompletedTask;
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return true;
         }
 
-        public async Task<Task> UpdateUser(UpdateUserCommand command)
+        public async Task<bool> UpdateUser(UpdateUserCommand command)
         {
 
-            User? currentUser = await _context.Users.FirstOrDefaultAsync(r => r.UserId == command.user.UserId);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(r => r.UserId == command.UserId);
             if (currentUser is null) throw new BadHttpRequestException("Bad");
 
             currentUser.Name = command.user.Name;
@@ -135,8 +180,9 @@ namespace RekrutacjaApp.Repositories
             currentUser.BirthDate = command.user.BirthDate;
             currentUser.Gender = command.user.Gender;
             await _context.SaveChangesAsync();
-            await _cache.DeleteRecordAsync<UserDto>($"User_{command.user.UserId}");
-            return Task.CompletedTask;
+            await _cache.DeleteRecordAsync<User>($"User_{command.UserId}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return true;
         }
 
         public async Task<List<User>> GetUsersForRaport()

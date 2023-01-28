@@ -6,23 +6,23 @@ namespace RekrutacjaApp.Entities
 {
     public enum Gender
     {
-        Male,
-        Famale,
-        Other
+        Mężczyzna,
+        Kobieta,
     }
+
+
+
     public class User : IValidatableObject
     {
 
-        private int currentYear = DateTime.Now.Year;
+        public DateTime currentDate = DateTime.Now;
 
         public int UserId { get; set; }
         [Required]
         [CustomPersonalValidator(50)]
-        [Remote(action: "VerifyName", controller: "Users", AdditionalFields = nameof(Name))]
         public required string Name { get; set; }
         [Required]
         [CustomPersonalValidator(150)]
-        [Remote(action: "VerifyName", controller: "Users", AdditionalFields = nameof(Surname))]
         public required string Surname { get; set; }
         [Required]
         [DataType(DataType.Date)]
@@ -31,6 +31,7 @@ namespace RekrutacjaApp.Entities
         [Required]
         [EnumDataType(typeof(Gender))]
         public required Gender Gender { get; set; }
+        public required bool CarLicense { get; set; }
         public List<CustomAttribute>? CustomAttributes { get; set; } = new();
       
         public string DisplayName
@@ -56,15 +57,15 @@ namespace RekrutacjaApp.Entities
         {
             get
             {
-                return Gender == Gender.Male ? "Pan" : "Pani";
+                return Gender == Gender.Mężczyzna ? "Pan" : "Pani";
             }
         }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (BirthDate.Year > currentYear)
+            if (BirthDate > currentDate)
             {
                 yield return new ValidationResult(
-                    $"Classic movies must have a release year no later than {currentYear}.",
+                    $"Twoja data urodzenia nie może być większa niż {currentDate}.",
                     new[] { nameof(BirthDate) });
             }
         }

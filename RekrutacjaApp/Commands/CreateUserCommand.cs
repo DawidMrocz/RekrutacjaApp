@@ -1,25 +1,32 @@
 ﻿using MediatR;
 using RekrutacjaApp.Entities;
-using RekrutacjaApp.Repository;
+using RekrutacjaApp.Repositories;
+
 
 namespace RekrutacjaApp.Commands
 {
-    public record CreateUserCommand : IRequest<Unit>
+    public record CreateUserCommand : IRequest<bool>
     {
         public required User user { get; set; }
     }
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Unit>
-    {    
-        private readonly IUnitOfWork _unitOfWork;
-        public CreateUserCommandHandler(IUnitOfWork unitOfWork)
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand,bool>
+    {
+        //private readonly IUserRepository _userRepository;
+        //public CreateUserCommandHandler(IUserRepository userRepository)
+        //{
+        //    _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        //}
+
+        private readonly IUserRepository _userRepository;
+        public CreateUserCommandHandler(IUserRepository userRepository)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.Users.Create(request.user);
-            return Task.FromResult(Unit.Value);
+            await _userRepository.CreateUser(request);
+            return true;
         }
     }
 }

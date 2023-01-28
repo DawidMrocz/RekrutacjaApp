@@ -3,7 +3,26 @@
     ViewData["Title"] = Model.DisplayName;
 }
 
-<h1>@Model.DisplayName</h1>
+
+
+<div class="row justify-content-between">
+
+
+    <div class="col">
+        <h1>@Model.DisplayName</h1>
+    </div>
+    <div class="col">
+        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+            Dodaj atrybut
+        </button>
+        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Edytuj użytkownika
+        </button>
+        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+            Usuń użytkownika
+        </button>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -13,44 +32,40 @@
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Edytuj użytkownika: @Model.DisplayName</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form class="row g-3">
-                    <div class="col-md-4">
+            <div class="modal-body" id="toaddinput">
+         
+                <form class="row g-3" method="Post" asp-action="UpdateUser" asp-controller="Home" asp-route-id="@Model.UserId">   
+                     @Html.AntiForgeryToken()
+                    <div class="col-md-6">
                         <label for="Name" class="form-label">Imię</label>
-                        <input type="text" class="form-control is-valid" id="Name" value="@Model.Name" placeholder="Imię..." required>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
+                        <input type="text" class="form-control" name="Name" id="Name" value="@Model.Name" placeholder="Imię..." required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                         <label for="Surname" class="form-label">Nazwisko</label>
-                        <input type="text" class="form-control is-valid" id="Surname" value="@Model.Surname" placeholder="Nazwisko..." required>
-                        <div class="valid-feedback">
-                            Looks good!
-                        </div>
+                        <input type="text" class="form-control" name="Surname" id="Surname" value="@Model.Surname" placeholder="Nazwisko..." required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                         <label for="validationServer03" class="form-label">Date urodzenia</label>
-                        <input type="date" class="form-control is-invalid" id="validationServer03" value="@Model.BirthDate" aria-describedby="validationServer03Feedback" required>
-                        <div id="validationServer03Feedback" class="invalid-feedback">
-                            Please provide a valid city.
-                        </div>
+                        <input type="date" class="form-control" name="BirthDate" id="validationServer03" value="@Model.BirthDate" aria-describedby="validationServer03Feedback" required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                         <label for="validationServer04" class="form-label">Płeć</label>
-                        <select class="form-select" aria-label="Default select example">
-
-                            <option selected value="1">@Model.Gender</option>
-                            <option value="2">Kobieta</option>
-                            <option value="3">Inne</option>
+                        <select class="form-select" aria-label="Default select example" name="Gender" value="@Model.Gender">
+                            <option selected value="Mężczyzna">@Model.Gender</option>
+                            <option value="Kobieta">Kobieta</option>
                         </select>
-                        <div id="validationServer04Feedback" class="invalid-feedback">
-                            Please select a valid state.
-                        </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="col-md-10">
+                        <label for="validationServer04" class="form-label">Prawo jazdy</label>
+                        <select class="form-select" aria-label="Default select example" value="@Model.CarLicense">
+                            <option selected disabled>Prawo jazdy</option>
+                            <option value="true">Tak</option>
+                            <option value="false">Nie</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer" >
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                        <button type="button" class="btn btn-primary">Edytuj</button>
+                        <button type="submit" class="btn btn-primary">Edytuj</button>
                     </div>
                 </form>
             </div>
@@ -67,52 +82,41 @@
 <div class="mb-3">
     <p><b>Płeć: </b>@Model.Gender</p>
 </div>
-
-
+@if(@Model.CarLicense)
+{
     <div class="mb-3">
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div class="ms-2 me-auto">
-                    <div class="fw-bold">Subheading</div>
-                    Content for list item
-                </div>
-                 
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div class="ms-2 me-auto">
-                    <div class="fw-bold">Subheading</div>
-                    Content for list item
-                </div>
-                 
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div class="ms-2 me-auto">
-                    <div class="fw-bold">Subheading</div>
-                    Content for list item
-                </div>
-                 
-            </li>
-        </ol>
+        <p><b>Prawo jazdy: </b>Tak</p>
     </div>
+}
+else
+{
+    <div class="mb-3">
+        <p><b>Prawo jazdy: </b>Nie</p>
+    </div>
+}
 
-<div class="row justify-content-start">
-    <div class="col-2">
-        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Edytuj użytkownika
-        </button>
-    </div>
-    <div class="col-2">
 
-        <button type="button" class="btn btn-primary" style="margin:10px 0px 10px 0px" data-bs-toggle="modal" data-bs-target="#exampleModal2">
-            Usuń użytkownika
-        </button>
-    </div>
+
+<div class="mb-3">
+    <ol class="list-group list-group-numbered">
+        @foreach (var item in Model.CustomAttributes)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">@item.Name</div>
+                    @item.Value
+                </div>
+                <form class="ms-2 me-auto" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="CustomAttributeId" value="@item.CustomAttributeId" class="form-control">
+                    <button type="submit" class="btn btn-primary">Usuń attrybut</button>
+                </form>
+            </li>
+        }
+    </ol>
 </div>
 
 
-
-
-<!-- Modal -->
 <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -123,15 +127,44 @@
             <div class="modal-body">
                 Czy napewno chcesz usunąć użytkownika @Model.DisplayName?
             </div>
-            <div class="modal-footer">
+            <form class="modal-footer" method="Post" asp-action="Delete" asp-controller="Home" asp-route-id="@Model.UserId">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" value="@Model.UserId" class="form-control">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                <button type="button" class="btn btn-primary">Usuń</button>
-            </div>
+                <button type="submit" class="btn btn-primary">Usuń</button>
+             </form>
         </div>
     </div>
 </div>
 
-
+<div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Dodaj atrybut</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3" method="Post" asp-action="AddAttribute" asp-controller="Home" asp-route-id="@Model.UserId">
+                    @Html.AntiForgeryToken()
+                    <div class="col-md-6">
+                        <label for="Name" class="form-label">Nazwa atrybutu</label>
+                        <input type="text" class="form-control" name="Name" id="Name" placeholder="Nazwa..." required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Value" class="form-label">Wartość</label>
+                        <input type="text" class="form-control" name="Value" id="Value" placeholder="Wartość..." required>
+                    </div>
+                    <div class="modal-footer" >
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                    </div>
+                </form>
+                </div>
+            </div>          
+        </div>
+    </div>
+</div>
 
 
 

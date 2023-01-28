@@ -9,7 +9,8 @@ namespace RekrutacjaApp.Dtos
         public required string Surname { get; set; }
         public required DateTime BirthDate { get; set; }
         public required Gender Gender { get; set; }
-        public List<CustomAttribute>? CustomAttributes { get; set; }
+        public required bool CarLicense { get; set; }
+        public List<CustomAttributeDto>? CustomAttributes { get; set; }
         public string DisplayName
         {
             get
@@ -31,7 +32,7 @@ namespace RekrutacjaApp.Dtos
         {
             get
             {
-                return Gender == Gender.Male ? "Pan" : "Pani";
+                return Gender == Gender.Mężczyzna ? "Pan" : "Pani";
             }
         }
     }

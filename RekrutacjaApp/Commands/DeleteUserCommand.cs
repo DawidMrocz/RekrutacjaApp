@@ -1,25 +1,33 @@
 ﻿using MediatR;
 using RekrutacjaApp.Entities;
-using RekrutacjaApp.Repository;
+using RekrutacjaApp.Repositories;
+
 
 namespace RekrutacjaApp.Commands
 {
-    public record DeleteUserCommand : IRequest<Unit>
+    public record DeleteUserCommand : IRequest<bool>
     {
         public required int UserId { get; set; }
     }
-    public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
+    public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public DeleteUserCommandHandler(IUnitOfWork unitOfWork)
+        //private readonly IUnitOfWork _unitOfWork;
+        //public DeleteUserCommandHandler(IUnitOfWork unitOfWork)
+        //{
+        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        //}
+
+        private readonly IUserRepository _userRepository;
+        public DeleteUserCommandHandler(IUserRepository userRepository)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            _unitOfWork.Users.Delete(request.UserId);
-            return Task.FromResult(Unit.Value);
+  
+            await _userRepository.DeleteUser(request);
+            return true;
         }
     }
 }

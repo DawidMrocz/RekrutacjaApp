@@ -112,6 +112,7 @@
             <th scope="col">Wiek</th>
             <th scope="col">Płeć</th>
             <th scope="col">Prawo jazdy</th>
+            <th scope="col">Dodatkowe attrybuty</th>
 
         </tr>
     </thead>
@@ -131,6 +132,7 @@
                 {
                     <td>Nie</td>
                 }
+                <td>@user.CustomAttributes.Count()</td>
                 
             </tr>
         }      

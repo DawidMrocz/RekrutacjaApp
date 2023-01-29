@@ -3,11 +3,7 @@
     ViewData["Title"] = Model.DisplayName;
 }
 
-
-
 <div class="row justify-content-between">
-
-
     <div class="col">
         <h1>@Model.DisplayName</h1>
     </div>
@@ -32,8 +28,7 @@
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Edytuj użytkownika: @Model.DisplayName</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="toaddinput">
-         
+            <div class="modal-body" id="toaddinput">       
                 <form class="row g-3" method="Post" asp-action="UpdateUser" asp-controller="Home" asp-route-id="@Model.UserId">   
                      @Html.AntiForgeryToken()
                     <div class="col-md-6">
@@ -69,14 +64,12 @@
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
 
-
 <div class="mb-3">
-    <p><b>Data urodzenia: </b>@Model.BirthDate</p>
+    <p><b>Data urodzenia: </b>@Model.BirthDate.ToShortDateString()  ( @Model.Age lat. )</p>
 </div>
 
 <div class="mb-3">
@@ -95,22 +88,22 @@ else
     </div>
 }
 
-
-
-<div class="mb-3">
+<div class="mb-4">
     <ol class="list-group list-group-numbered">
         @foreach (var item in Model.CustomAttributes)
         {
-            <li class="list-group-item d-flex justify-content-between align-items-start">
+            <li class="list-group-item d-flex justify-content-start">
+                
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">@item.Name</div>
                     @item.Value
                 </div>
-                <form class="ms-2 me-auto" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId">
+                <form class="ms-1" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="CustomAttributeId" value="@item.CustomAttributeId" class="form-control">
                     <button type="submit" class="btn btn-primary">Usuń attrybut</button>
                 </form>
+                
             </li>
         }
     </ol>

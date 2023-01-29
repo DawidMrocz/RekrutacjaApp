@@ -32,8 +32,7 @@ namespace RekrutacjaApp.Entities
         [EnumDataType(typeof(Gender))]
         public required Gender Gender { get; set; }
         public required bool CarLicense { get; set; }
-        public List<CustomAttribute>? CustomAttributes { get; set; } = new();
-      
+        public List<CustomAttribute>? CustomAttributes { get; set; } = new();    
         public string DisplayName
         {
             get
@@ -41,7 +40,6 @@ namespace RekrutacjaApp.Entities
                 return $"{Name} {Surname}";
             }
         }
-
         public int Age
         {
             get
@@ -52,7 +50,6 @@ namespace RekrutacjaApp.Entities
                 return age;
             }
         }
-
         public string Title
         {
             get
@@ -69,6 +66,5 @@ namespace RekrutacjaApp.Entities
                     new[] { nameof(BirthDate) });
             }
         }
-
     }
 }

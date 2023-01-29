@@ -24,7 +24,7 @@ namespace RekrutacjaApp.Repositories
     public interface IUserRepository
     {
         public Task<UserDto> GetUser(GetUserQuery query);
-        public Task<List<User>> GetUsers(GetUsersQuery query);
+        public Task<List<UserDto>> GetUsers(GetUsersQuery query);
         public Task<bool> CreateUser(CreateUserCommand command);
         public Task<bool> UpdateUser(UpdateUserCommand command);
         public Task<bool> DeleteUser(DeleteUserCommand command);

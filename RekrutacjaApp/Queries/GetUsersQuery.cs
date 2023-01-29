@@ -16,24 +16,22 @@ namespace RekrutacjaApp.Queries
     {
         //private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepostiory;
-        private readonly IMapper _mapper;
         //public GetUserQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         //{
         //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         //    _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         //}
 
-        public GetUsersQueryHandler(IUserRepository userRepostiory, IMapper mapper)
+        public GetUsersQueryHandler(IUserRepository userRepostiory)
         {
             _userRepostiory = userRepostiory ?? throw new ArgumentNullException(nameof(userRepostiory));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
 
         public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
             //return _mapper.Map<List<UserDto>>(await _unitOfWork.Users.GetAll(request.queryParams));
-            return _mapper.Map<List<UserDto>>(await _userRepostiory.GetUsers(request));
+            return await _userRepostiory.GetUsers(request);
         }
 
     }

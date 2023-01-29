@@ -37,21 +37,14 @@ namespace RekrutacjaApp.Repositories
             return true;
         }
 
-        public async Task<List<User>> GetUsers(GetUsersQuery command)
+        public async Task<List<UserDto>> GetUsers(GetUsersQuery command)
         {
             string key = JsonConvert.SerializeObject(command.queryParams);
-            Console.WriteLine(key);
-            Console.WriteLine(key);
-            Console.WriteLine(key);
-
-            Console.WriteLine(key);
-
-            Console.WriteLine(key);
-            List<User>? users = await _cache.GetRecordAsync<List<User>>(key);
+            List<UserDto>? users = await _cache.GetRecordAsync<List<UserDto>>(key);
             if (users is null)
             {
 
-                var query = _context.Users            
+                var query = _context.Users.Include(c => c.CustomAttributes)           
                 .AsQueryable();
 
                 if (!string.IsNullOrEmpty(command.queryParams.SearchString))
@@ -82,6 +75,7 @@ namespace RekrutacjaApp.Repositories
                 var totalCount = await query.CountAsync();
                 users = await query
                     .AsNoTracking()
+                    .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
                     .ToListAsync();
 
                 await _cache.SetRecordAsync(key, users);

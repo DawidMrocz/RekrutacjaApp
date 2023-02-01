@@ -30,7 +30,6 @@
             </div>
             <div class="modal-body" id="toaddinput">       
                 <form class="row g-3" method="Post" asp-action="UpdateUser" asp-controller="Home" asp-route-id="@Model.UserId">   
-                     @Html.AntiForgeryToken()
                     <div class="col-md-6">
                         <label for="Name" class="form-label">Imię</label>
                         <input type="text" class="form-control" name="Name" id="Name" value="@Model.Name" placeholder="Imię..." required>
@@ -99,7 +98,6 @@ else
                     @item.Value
                 </div>
                 <form class="ms-1" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId">
-                    @Html.AntiForgeryToken()
                     <input type="hidden" name="CustomAttributeId" value="@item.CustomAttributeId" class="form-control">
                     <button type="submit" class="btn btn-primary">Usuń attrybut</button>
                 </form>
@@ -121,7 +119,6 @@ else
                 Czy napewno chcesz usunąć użytkownika @Model.DisplayName?
             </div>
             <form class="modal-footer" method="Post" asp-action="Delete" asp-controller="Home" asp-route-id="@Model.UserId">
-                @Html.AntiForgeryToken()
                 <input type="hidden" name="UserId" value="@Model.UserId" class="form-control">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
                 <button type="submit" class="btn btn-primary">Usuń</button>
@@ -139,7 +136,6 @@ else
             </div>
             <div class="modal-body">
                 <form class="row g-3" method="Post" asp-action="AddAttribute" asp-controller="Home" asp-route-id="@Model.UserId">
-                    @Html.AntiForgeryToken()
                     <div class="col-md-6">
                         <label for="Name" class="form-label">Nazwa atrybutu</label>
                         <input type="text" class="form-control" name="Name" id="Name" placeholder="Nazwa..." required>

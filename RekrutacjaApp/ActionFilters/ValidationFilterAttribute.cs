@@ -7,26 +7,12 @@ namespace RekrutacjaApp.ActionFilters
 {
     public class ValidationFilterAttribute : ActionFilterAttribute, IActionFilter
     {
-        public void OnActionExecuting(ActionExecutingContext context)
+        public required string DTOName { get; set; }
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            Console.WriteLine(context.ActionArguments.ToString());
-            Console.WriteLine(context.ActionArguments.ToString());
-            Console.WriteLine(context.ActionArguments.ToString());
+            if (context.ActionArguments[DTOName] == null) context.Result = new BadRequestObjectResult("Object is null");
 
-            Console.WriteLine(context.ActionArguments.ToString());
-
-            Console.WriteLine(context.ActionArguments.ToString());
-            var param = context.ActionArguments.SingleOrDefault(p => p.Value is IEntityType);
-            if (param.Value == null)
-            {
-                context.Result = new BadRequestObjectResult("Object is null :/");
-                
-            }
-
-            if (!context.ModelState.IsValid)
-            {
-                context.Result = new BadRequestObjectResult("Object is incorrect");
-            }
+            if (!context.ModelState.IsValid) context.Result = new BadRequestObjectResult("Object is incorrect");
         }
     }
 }

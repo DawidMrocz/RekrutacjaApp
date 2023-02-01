@@ -26,7 +26,6 @@ namespace RekrutacjaApp.Repositories
                     query = query.Include(includeProperty);
                 }
             }
-
             return await query.AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
@@ -42,10 +41,7 @@ namespace RekrutacjaApp.Repositories
                 query = query.Where(item);
             }
 
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
+            if (orderBy != null) query = orderBy(query);
 
             if (includes != null)
             {
@@ -54,9 +50,7 @@ namespace RekrutacjaApp.Repositories
                     query = query.Include(includeProperty);
                 }
             }
-
             return await query.AsNoTracking().ToListAsync();
-
         }
 
         public async Task Add(T entity)

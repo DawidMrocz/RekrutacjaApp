@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
+using Newtonsoft.Json;
 using RekrutacjaApp.ActionFilters;
 using RekrutacjaApp.Commands;
 using RekrutacjaApp.Data;
@@ -14,6 +15,7 @@ using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
 using System.Diagnostics;
 using System.Net;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RekrutacjaApp.Controllers
 {
@@ -78,7 +80,7 @@ namespace RekrutacjaApp.Controllers
         }
 
         [HttpGet]
-        [CustomFilterAttribute]
+        [IdProvidedValidation]
         [ProducesResponseType(typeof(UserDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<UserDto>> Details([FromRoute] int id)
@@ -94,7 +96,7 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [ValidationFilter]
+        [ValidationFilter(DTOName = "createUser")]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User createUser)
@@ -109,11 +111,12 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [IdProvidedValidation]
+        [ValidationFilter(DTOName = "myattribute")]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> AddAttribute([FromForm][Bind(include:"Name,Value")] CustomAttributeDto myattribute, [FromRoute] int id)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
             AddAttributeCommand addAttributeCommand = new()
             {
                 Id = id,
@@ -125,6 +128,7 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [IdProvidedValidation]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> RemoveAttribute([FromRoute] int id)
@@ -139,6 +143,7 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [IdProvidedValidation]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Delete([FromRoute] int id)
@@ -153,7 +158,8 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [ValidationFilter]
+        [ValidationFilter(DTOName = "updateUser")]
+        [IdProvidedValidation]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User updateUser, [FromRoute] int id)

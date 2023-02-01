@@ -1,13 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Newtonsoft.Json;
 
 namespace RekrutacjaApp.ActionFilters
 {
-    public class CustomFilterAttribute : ActionFilterAttribute, IActionFilter
+    public class IdProvidedValidationAttribute : ActionFilterAttribute, IActionFilter
     {
-        public void OnActionExecuting(ActionExecutingContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            Console.WriteLine("DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAW");
-              
+            bool exist = context.ActionArguments.ContainsKey("id");
+            if (!exist)
+            {
+                context.Result = new BadRequestObjectResult("ID not found");
+                return;
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ namespace RekrutacjaApp.Repositories
     {
         Task<T> GetById(Expression<Func<T,bool>> expression,List<string> includes = null);
         Task<List<T>> GetAll(
-            Expression<Func<T, bool>> expression = null, 
+            Expression<Func<T,bool>> expression = null, 
             Func<IQueryable<T>,IOrderedQueryable<T>> orderedBy = null,
             List<string> includes = null
             );

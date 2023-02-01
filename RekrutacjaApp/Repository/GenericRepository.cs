@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using RekrutacjaApp.Data;
+using System;
 
 namespace RekrutacjaApp.Repositories
 {
@@ -30,7 +31,7 @@ namespace RekrutacjaApp.Repositories
         }
 
         public async Task<List<T>> GetAll(
-            Expression<Func<T, bool>> predicate = null,
+            Expression<Func<T,bool>> predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
             List<string> includes = null)
         {

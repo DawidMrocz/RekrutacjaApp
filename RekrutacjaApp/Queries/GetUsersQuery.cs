@@ -22,7 +22,9 @@ namespace RekrutacjaApp.Queries
 
         public async Task<List<User>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            return await _unitOfWork.Users.GetAll();
+            List<string> properties = new List<string>();
+            properties.Add("CustomAttributes");
+            return await _unitOfWork.Users.GetAll(u => u.Name.Contains(request.queryParams.SearchString), orderedBy: q => q.OrderBy(d => request.queryParams.SortOrder == "name" ? d.Name : d.Surname),includes: properties);
         }
     }
 }

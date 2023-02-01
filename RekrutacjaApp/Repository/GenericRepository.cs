@@ -31,15 +31,15 @@ namespace RekrutacjaApp.Repositories
         }
 
         public async Task<List<T>> GetAll(
-            Expression<Func<T,bool>> predicate = null,
+            List<Expression<Func<T,bool>>> filters = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
             List<string> includes = null)
         {
             IQueryable<T> query = _db;
 
-            if (predicate != null)
+            foreach(Expression<Func<T, bool>> item in filters)
             {
-                query = query.Where(predicate);
+                query = query.Where(item);
             }
 
             if (orderBy != null)
@@ -72,8 +72,7 @@ namespace RekrutacjaApp.Repositories
 
         public async Task Update(T entity)
         {
-            _db.Attach(entity);
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            _db.Update(entity);
         }
     }
 }

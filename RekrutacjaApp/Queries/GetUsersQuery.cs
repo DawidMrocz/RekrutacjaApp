@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MyWebApplication.Dtos;
-using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
 using RekrutacjaApp.Repositories;
-
+using System.Linq.Expressions;
 
 namespace RekrutacjaApp.Queries
 {
@@ -22,9 +20,17 @@ namespace RekrutacjaApp.Queries
 
         public async Task<List<User>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
+            List<Expression<Func<User, bool>>> filters = new List<Expression<Func<User, bool>>>();
+            filters.Add(u => u.Name.Contains(request.queryParams.SearchString));
+            if(request.queryParams.CarLicense is not null) filters.Add(u => u.CarLicense == request.queryParams.CarLicense);
+            if (request.queryParams.Gender is not null) filters.Add(u => u.Gender == request.queryParams.Gender);
             List<string> properties = new List<string>();
             properties.Add("CustomAttributes");
-            return await _unitOfWork.Users.GetAll(u => u.Name.Contains(request.queryParams.SearchString), orderedBy: q => q.OrderBy(d => request.queryParams.SortOrder == "name" ? d.Name : d.Surname),includes: properties);
+            return await _unitOfWork.Users.GetAll(
+                filters,
+                orderedBy: q => q.OrderBy(d => request.queryParams.SortOrder == "name" ? d.Name : d.Surname),
+                includes: properties
+                );
         }
     }
 }

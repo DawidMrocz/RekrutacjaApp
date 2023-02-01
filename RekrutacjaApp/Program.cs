@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RekrutacjaApp.ActionFilters;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Repositories;
 
@@ -26,6 +27,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
 builder.Services.AddControllersWithViews();

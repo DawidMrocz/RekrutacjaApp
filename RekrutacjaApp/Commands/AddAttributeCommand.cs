@@ -11,12 +11,6 @@ namespace RekrutacjaApp.Commands
     }
     public class AddAttributeCommandHandler : IRequestHandler<AddAttributeCommand, Unit>
     {
-        //private readonly IUnitOfWork _unitOfWork;
-        //public AddAttributeCommandHandler(IUnitOfWork unitOfWork)
-        //{
-        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        //}
-
         private readonly IUserRepository _userRepository;
         public AddAttributeCommandHandler(IUserRepository userRepository)
         {

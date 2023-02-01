@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
+using RekrutacjaApp.ActionFilters;
 using RekrutacjaApp.Commands;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
@@ -14,7 +14,6 @@ using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http.Headers;
 
 namespace RekrutacjaApp.Controllers
 {
@@ -60,7 +59,7 @@ namespace RekrutacjaApp.Controllers
                 writer.WriteLine("Imię,Nazwisko,Data urodzenia,Płeć,Tytuł,Wiek");
                 foreach (var user in users)
                 {
-                    writer.WriteLine("{0},{1},{2},{3},{4}", user.Title,user.DisplayName, user.BirthDate.ToString("yyyy-MM-dd"), user.Age, user.Gender);
+                    writer.WriteLine("{0},{1},{2},{3},{4}", user.Title, user.DisplayName, user.BirthDate.ToString("yyyy-MM-dd"), user.Age, user.Gender);
                 }
             }
             return RedirectToAction(nameof(Index));
@@ -79,6 +78,7 @@ namespace RekrutacjaApp.Controllers
         }
 
         [HttpGet]
+        [CustomFilterAttribute]
         [ProducesResponseType(typeof(UserDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<UserDto>> Details([FromRoute] int id)
@@ -94,11 +94,11 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ValidationFilter]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User createUser)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
             CreateUserCommand createUserCommand = new CreateUserCommand()
             {
                 user = createUser,
@@ -153,12 +153,11 @@ namespace RekrutacjaApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ValidationFilter]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User updateUser, [FromRoute] int id)
         {
-            Console.WriteLine("Check");
-            if (!ModelState.IsValid) return BadRequest(ModelState);
                 UpdateUserCommand updateUserCommand = new UpdateUserCommand()
                 {
                     UserId =id,

@@ -44,13 +44,6 @@ namespace RekrutacjaApp.Repositories
         //    if (users is null)
         //    {
 
-        //        var query = _context.Users.Include(c => c.CustomAttributes)           
-        //        .AsQueryable();
-
-        //        if (!string.IsNullOrEmpty(command.queryParams.SearchString))
-        //        {
-        //            query = query.Where(u => u.Name.Contains(command.queryParams.SearchString) || u.Surname.Contains(command.queryParams.SearchString)).AsQueryable();
-        //        };
 
         //        if (command.queryParams.CarLicense is not null)
         //        {
@@ -62,21 +55,9 @@ namespace RekrutacjaApp.Repositories
         //            query = query.Where(u => u.Gender == command.queryParams.Gender).AsQueryable();
         //        };
 
-        //        switch (command.queryParams.SortOrder)
-        //        {
-        //            case "name":
-        //                query = query.OrderBy(u => u.Name).AsQueryable(); ; break;
-        //            case "surname":
-        //                query = query.OrderBy(s => s.Surname).AsQueryable(); ; break;
-        //            default:
-        //                break;
-        //        }
-
         //        var totalCount = await query.CountAsync();
         //        users = await query
-        //            .AsNoTracking()
         //            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-        //            .ToListAsync();
 
         //        await _cache.SetRecordAsync(key, users);
         //    }
@@ -89,12 +70,7 @@ namespace RekrutacjaApp.Repositories
                 .Include(a => a.CustomAttributes)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
             if (foundedUser is null) throw new BadHttpRequestException("User not found");
-            Console.WriteLine(foundedUser.UserId);
-            Console.WriteLine(foundedUser.UserId);
-            Console.WriteLine(foundedUser.UserId);
 
-
-            Console.WriteLine(foundedUser.UserId);
             CustomAttribute newAttribute = new CustomAttribute()
             {
                 UserId = foundedUser.UserId,

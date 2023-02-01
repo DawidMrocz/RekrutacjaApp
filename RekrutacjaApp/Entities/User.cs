@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata;
 using RekrutacjaApp.Helpers;
 using System.ComponentModel.DataAnnotations;
 

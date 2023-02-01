@@ -22,6 +22,7 @@ namespace RekrutacjaApp.Commands
         public async Task<bool> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             await _unitOfWork.Users.Update(request.user);
+            await _unitOfWork.Save();
             return true;
         }
     }

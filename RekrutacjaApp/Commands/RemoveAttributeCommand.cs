@@ -14,7 +14,6 @@ namespace RekrutacjaApp.Commands
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
-
         public async Task<bool> Handle(RemoveAttributeCommand request, CancellationToken cancellationToken)
         {
             await _userRepository.RemoveAttribute(request);

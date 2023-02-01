@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,6 +14,7 @@ using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http.Headers;
 
 namespace RekrutacjaApp.Controllers
 {
@@ -155,6 +157,7 @@ namespace RekrutacjaApp.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User updateUser, [FromRoute] int id)
         {
+            Console.WriteLine("Check");
             if (!ModelState.IsValid) return BadRequest(ModelState);
                 UpdateUserCommand updateUserCommand = new UpdateUserCommand()
                 {

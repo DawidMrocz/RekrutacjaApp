@@ -33,6 +33,5 @@ namespace RekrutacjaApp.Queries
             //return _mapper.Map<List<UserDto>>(await _unitOfWork.Users.GetAll(request.queryParams));
             return await _userRepostiory.GetUsers(request);
         }
-
     }
 }

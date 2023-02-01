@@ -11,22 +11,15 @@ namespace RekrutacjaApp.Commands
     }
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
     {
-        //private readonly IUnitOfWork _unitOfWork;
-        //public DeleteUserCommandHandler(IUnitOfWork unitOfWork)
-        //{
-        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        //}
-
-        private readonly IUserRepository _userRepository;
-        public DeleteUserCommandHandler(IUserRepository userRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public DeleteUserCommandHandler(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-  
-            await _userRepository.DeleteUser(request);
+            await _unitOfWork.Users.Delete(request.UserId);
             return true;
         }
     }

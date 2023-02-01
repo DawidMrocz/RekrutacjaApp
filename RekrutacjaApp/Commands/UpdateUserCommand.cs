@@ -13,20 +13,15 @@ namespace RekrutacjaApp.Commands
     }
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand,bool>
     {
-        //private readonly IUnitOfWork _unitOfWork;
-        //public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
-        //{
-        //    _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        //}
-        private readonly IUserRepository _userRepository;
-        public UpdateUserCommandHandler(IUserRepository userRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<bool> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            await _userRepository.UpdateUser(request);
+            await _unitOfWork.Users.Update(request.user);
             return true;
         }
     }

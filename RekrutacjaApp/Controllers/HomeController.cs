@@ -73,7 +73,7 @@ namespace RekrutacjaApp.Controllers
             {
                 queryParams = stringParameters
             };
-            List<UserDto>? users = await _mediatr.Send(getUsersQuery);
+            List<UserDto>? users = _mapper.Map<List<UserDto>>(await _mediatr.Send(getUsersQuery));
             if (users is null) NotFound("No users");
             return View(users);
         }
@@ -87,7 +87,7 @@ namespace RekrutacjaApp.Controllers
             {
                 userId= id
             };
-            UserDto user = await _mediatr.Send(getUserQuery);
+            UserDto user = _mapper.Map<UserDto>(await _mediatr.Send(getUserQuery));
             if (user is null) return NotFound("User not found!");
             return View(user);
         }

@@ -11,21 +11,15 @@ namespace RekrutacjaApp.Commands
     }
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand,bool>
     {
-        //private readonly IUserRepository _userRepository;
-        //public CreateUserCommandHandler(IUserRepository userRepository)
-        //{
-        //    _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        //}
-
-        private readonly IUserRepository _userRepository;
-        public CreateUserCommandHandler(IUserRepository userRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public CreateUserCommandHandler(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<bool> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            await _userRepository.CreateUser(request);
+            await _unitOfWork.Users.Add(request.user);
             return true;
         }
     }

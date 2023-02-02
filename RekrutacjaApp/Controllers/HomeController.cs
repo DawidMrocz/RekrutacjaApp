@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using MyWebApplication.Dtos;
 using Newtonsoft.Json;
@@ -10,11 +11,13 @@ using RekrutacjaApp.Commands;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
+using RekrutacjaApp.Helpers;
 using RekrutacjaApp.Models;
 using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection.Metadata;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RekrutacjaApp.Controllers
@@ -27,6 +30,7 @@ namespace RekrutacjaApp.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly ApplicationDbContext _context;
+        private readonly IDistributedCache _cache;
 
         public HomeController
             (
@@ -35,7 +39,8 @@ namespace RekrutacjaApp.Controllers
                 IMapper mapper,
                 IMediator mediatr,
                 IUserRepository userRepository,
-                ApplicationDbContext context
+                ApplicationDbContext context,
+                IDistributedCache cache
             )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -44,6 +49,7 @@ namespace RekrutacjaApp.Controllers
             _mediatr = mediatr ?? throw new ArgumentNullException(nameof(mediatr));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _context = context;
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         [HttpPost]
@@ -74,7 +80,14 @@ namespace RekrutacjaApp.Controllers
             {
                 queryParams = stringParameters
             };
-            List<UserDto>? users = _mapper.Map<List<UserDto>>(await _mediatr.Send(getUsersQuery));
+
+            string key = JsonConvert.SerializeObject(stringParameters);
+            List<UserDto>? users = await _cache.GetRecordAsync<List<UserDto>>(key);
+            if (users is null)
+            {
+                users = _mapper.Map<List<UserDto>>(await _mediatr.Send(getUsersQuery));
+                await _cache.SetRecordAsync(key, users);
+            }
             if (users is null) NotFound("No users");
             return View(users);
         }
@@ -87,9 +100,14 @@ namespace RekrutacjaApp.Controllers
         {
             GetUserQuery getUserQuery = new()
             {
-                userId= id
+                userId = id
             };
-            UserDto user = _mapper.Map<UserDto>(await _mediatr.Send(getUserQuery));
+            UserDto? user = await _cache.GetRecordAsync<UserDto>($"User_{id}");
+            if (user is null)
+            {
+                user = _mapper.Map<UserDto>(await _mediatr.Send(getUserQuery));
+                await _cache.SetRecordAsync($"User_{id}", user);
+            }
             if (user is null) return NotFound("User not found!");
             return View(user);
         }
@@ -101,11 +119,13 @@ namespace RekrutacjaApp.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> CreateUser([FromForm][Bind(include:"Name,Surname,BirthDate,Gender,CarLicense")] User createUser)
         {
+
             CreateUserCommand createUserCommand = new CreateUserCommand()
             {
                 user = createUser,
             };
             await _mediatr.Send(createUserCommand);
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
             return RedirectToAction(nameof(Index));
         }
 
@@ -123,21 +143,26 @@ namespace RekrutacjaApp.Controllers
                 attribute = myattribute
             };
             await _mediatr.Send(addAttributeCommand);
-            return RedirectToAction("Details", new { id = id });
+            await _cache.DeleteRecordAsync<User>($"User_{id}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [IdProvidedValidation]
+        //[CacheActionFilter(cache,DTOName ="userId")]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> RemoveAttribute([FromRoute] int id)
+        public async Task<IActionResult> RemoveAttribute([FromRoute] int id, [FromQuery] int userId)
         {
             RemoveAttributeCommand removeAttributeCommand = new RemoveAttributeCommand()
             {
                 Id = id
             };
             await _mediatr.Send(removeAttributeCommand);
+            await _cache.DeleteRecordAsync<User>($"User_{userId}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
             return RedirectToAction(nameof(Index));
         }
 
@@ -152,8 +177,10 @@ namespace RekrutacjaApp.Controllers
                 {
                     UserId= id
                 };
-                await _mediatr.Send(deleteUserCommand);    
-                return RedirectToAction(nameof(Index));    
+                await _mediatr.Send(deleteUserCommand);
+            await _cache.DeleteRecordAsync<User>($"User_{id}");
+            await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return RedirectToAction(nameof(Index));    
         }
 
         [HttpPost]
@@ -170,7 +197,9 @@ namespace RekrutacjaApp.Controllers
                     user= updateUser,
                 };
                 await _mediatr.Send(updateUserCommand);
-                return RedirectToAction("Details", new { id = id });
+                await _cache.DeleteRecordAsync<User>($"User_{id}");
+                await _cache.DeleteRecordAsync<List<User>>(JsonConvert.SerializeObject(new QueryParams()));
+            return RedirectToAction("Details", new { id = id });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

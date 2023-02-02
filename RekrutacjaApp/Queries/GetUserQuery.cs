@@ -21,7 +21,9 @@ namespace RekrutacjaApp.Queries
 
         public async Task<User> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
-            return await _unitOfWork.Users.GetById(u => u.UserId == request.userId);
+            List<string> properties = new List<string>();
+            properties.Add("CustomAttributes");
+            return await _unitOfWork.Users.GetById(u => u.UserId == request.userId,includes:properties);
         }
     }
 }

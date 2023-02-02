@@ -12,6 +12,6 @@ namespace RekrutacjaApp.Repositories
             );
         Task Add(T entity);
         Task Delete(int id);
-        Task Update(T entity);
+        void Update(T entity);
     }
 }

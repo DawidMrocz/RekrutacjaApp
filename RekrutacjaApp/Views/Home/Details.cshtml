@@ -97,7 +97,7 @@ else
                     <div class="fw-bold">@item.Name</div>
                     @item.Value
                 </div>
-                <form class="ms-1" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId">
+                <form class="ms-1" method="Post" asp-action="RemoveAttribute" asp-controller="Home" asp-route-id="@item.CustomAttributeId" asp-route-userid="@Model.UserId">
                     <input type="hidden" name="CustomAttributeId" value="@item.CustomAttributeId" class="form-control">
                     <button type="submit" class="btn btn-primary">Usuń attrybut</button>
                 </form>

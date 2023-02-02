@@ -64,9 +64,10 @@ namespace RekrutacjaApp.Repositories
             _db.Remove(entity);
         }
 
-        public async Task Update(T entity)
+        public void Update(T entity)
         {
-            _db.Update(entity);
+            _db.Attach(entity);
+            _db.Entry(entity).State = EntityState.Modified;
         }
     }
 }

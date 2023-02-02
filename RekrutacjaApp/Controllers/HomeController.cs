@@ -151,7 +151,6 @@ namespace RekrutacjaApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [IdProvidedValidation]
-        //[CacheActionFilter(cache,DTOName ="userId")]
         [ProducesResponseType(typeof(User), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> RemoveAttribute([FromRoute] int id, [FromQuery] int userId)

@@ -1,17 +1,9 @@
 ﻿
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using MyWebApplication.Dtos;
-using Newtonsoft.Json;
 using RekrutacjaApp.Commands;
 using RekrutacjaApp.Data;
 using RekrutacjaApp.Dtos;
 using RekrutacjaApp.Entities;
-using RekrutacjaApp.Helpers;
-using RekrutacjaApp.Queries;
-
 
 namespace RekrutacjaApp.Repositories
 {

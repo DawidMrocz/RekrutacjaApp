@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,6 +16,7 @@ using RekrutacjaApp.Helpers;
 using RekrutacjaApp.Models;
 using RekrutacjaApp.Queries;
 using RekrutacjaApp.Repositories;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection.Metadata;
@@ -83,12 +85,18 @@ namespace RekrutacjaApp.Controllers
 
             string key = JsonConvert.SerializeObject(stringParameters);
             List<UserDto>? users = await _cache.GetRecordAsync<List<UserDto>>(key);
-            if (users is null)
-            {
-                users = _mapper.Map<List<UserDto>>(await _mediatr.Send(getUsersQuery));
-                await _cache.SetRecordAsync(key, users);
-            }
-            if (users is null) NotFound("No users");
+
+                if (users is null)
+                {
+          
+                        users = _mapper.Map<List<UserDto>>(await _mediatr.Send(getUsersQuery));
+
+                        await _cache.SetRecordAsync(key, users);
+                    
+
+                }         
+           
+            
             return View(users);
         }
 
